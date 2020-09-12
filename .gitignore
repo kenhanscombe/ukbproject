@@ -1,0 +1,4 @@
+.vscode
+rosalind-env
+__pycache__
+*.egg-info

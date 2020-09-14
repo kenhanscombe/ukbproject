@@ -4,6 +4,7 @@ python:
 install:
     - pip install -r requirements
 script:
-    - python test_withdraw.py
+    - coverage run test_withdraw.py
 after_success:
     - codecov
+    - bash <(curl -s https://codecov.io/bash)

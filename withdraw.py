@@ -33,22 +33,9 @@ def withdraw_index(withdraw, fam, sample):
     f['exclude'] = f['exclude'].fillna(0).astype(int)
     s['exclude'] = s['exclude'].fillna(0).astype(int)
 
-    # Include fam file phe column: 'redacted', 'dropout'
-    f.loc[f['phe'].eq('redacted'), 'exclude'] = 1
-    f.loc[f['phe'].eq('dropout'), 'exclude'] = 1
-
-    # Add redacted/dropout fam exclude to sample exclude
-    s = pd.merge(s[['id1', 'exclude']], f[['fid', 'exclude']],
-                 how='left', left_on='id1', right_on='fid',
-                 sort=False, suffixes=('_s', '_f'), validate='1:1')
-
-    s.loc[(
-        (s['exclude_s'] == 1) |
-        (s['exclude_f'] == 1)), 'exclude'] = 1
-    s.loc[(
-        (s['exclude_s'] == 0) &
-        (s['exclude_f'] == 0)), 'exclude'] = 0
-    s['exclude'] = s['exclude'].astype(pd.Int64Dtype())
+    # Include fam and sample negative ids
+    f.loc[f['fid'].lt(0), 'exclude'] = 1
+    s.loc[s['id1'].lt(0), 'exclude'] = 1
 
     # Add index
     f['index'] = [x + 1 for x in list(range(f.shape[0]))]

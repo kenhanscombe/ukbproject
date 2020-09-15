@@ -6,9 +6,9 @@ ukbgen
 
 A python module and CLI to generate exclusion lists as input for
 qctool v2 `--excl-samples` and plink 1.9/ 2.0 `--remove`. The
-exclusions are a combination of withdrawals and samples marked as
-'redacted' or 'dropout' in the phenotype column of the project
-.fam file.
+exclusions are a combination of withdrawals and samples with negative
+ids (marked as 'redacted*' or 'dropout*' in the phenotype column of
+the project .fam file).
 
 **Note**. This python3 project is in alpha development. KCL Rosalind users load the default python3 module (`module avail python3`).
 

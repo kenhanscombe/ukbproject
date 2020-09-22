@@ -54,7 +54,7 @@ def exclude(withdrawal, fam, sample, out_dir):
         f.write(str(log_info['fam_in_withdrawal_n']) +
                 ' fam file IDs in withdrawal file\n')
         f.write(str(log_info['fam_exclusion_n']) +
-                f' exclusion IDs for genotyped genetic data written to excl_gen_{d2}.id;',
+                f' exclusion IDs for genotyped genetic data written to excl_gen_{d2}.id;' +
                 f' indices written to excl_gen_{d2}.index' + '\n')
 
         f.write(str(log_info['sample_n']) + ' sample file IDs\n')
@@ -63,7 +63,7 @@ def exclude(withdrawal, fam, sample, out_dir):
         f.write(str(log_info['sample_in_withdrawal_n']) +
                 ' sample file IDs in withdrawal file\n')
         f.write(str(log_info['sample_exclusion_n']) +
-                f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;',
+                f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;' +
                 f' indices written to excl_imp_{d2}.index' + '\n')
 
 

@@ -56,7 +56,7 @@ def withdraw_index(withdraw, fam, sample):
                 'fam_in_withdrawal_n': sum(f['fid'].isin(w['id']).tolist()),
                 'fam_exclusion_n': f.loc[f['exclude'].eq(1)].shape[0],
                 'sample_n': s.shape[0],
-                'sample_negative_n': s.loc[s['fid'].lt(0)].shape[0],
+                'sample_negative_n': s.loc[s['ID_1'].lt(0)].shape[0],
                 'sample_in_withdrawal_n': sum(s['ID_1'].isin(w['id']).tolist()),
                 'sample_exclusion_n': s.loc[s['exclude'].eq(1)].shape[0]}
 

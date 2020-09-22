@@ -10,7 +10,7 @@ import withdraw
 @click.option('-f', '--fam', help='Path to the fam file.')
 @click.option('-s', '--sample', help='Path to the sample file.')
 @click.option('-o', '--out-dir', default='./')
-def ukbexclude(project_id, withdrawal, fam, sample, out_dir):
+def exclude(project_id, withdrawal, fam, sample, out_dir):
     """Writes a file of withdrawal ids (.exclude) and a corresponding
     file of indeces (.index), to remove from the genotyped and imputed
     data. These withdrawal ids are a combination of ids in the
@@ -41,4 +41,4 @@ def ukbexclude(project_id, withdrawal, fam, sample, out_dir):
 
 
 if __name__ == "__main__":
-    ukbexclude()
+    exclude()

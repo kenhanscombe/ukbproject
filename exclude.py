@@ -22,9 +22,9 @@ def exclude(withdrawal, fam, sample, out_dir):
         withdrawal, fam, sample)
 
     def write_excl(excl, gen, ext, date=date.today().strftime('%d%m%Y')):
-        if (gen == 'genotyped') & (ext == 'exclude'):
+        if (gen == 'genotyped') & (ext == 'id'):
             id_col = 'fid'
-        elif (gen == 'imputed') & (ext == 'exclude'):
+        elif (gen == 'imputed') & (ext == 'id'):
             id_col = 'ID_1'
         else:
             id_col = 'index'

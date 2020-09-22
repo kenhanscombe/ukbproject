@@ -8,7 +8,7 @@ from datetime import date
               help='Path to the withdrawal file.')
 @click.option('-f', '--fam', help='Path to the fam file.')
 @click.option('-s', '--sample', help='Path to the sample file.')
-@click.option('-o', '--out-dir', default='./')
+@click.option('-o', '--out-dir', default='.')
 def exclude(withdrawal, fam, sample, out_dir):
     """Writes a file of withdrawal ids (.exclude) and a corresponding
     file of indeces (.index), to remove from the genotyped and imputed
@@ -31,7 +31,7 @@ def exclude(withdrawal, fam, sample, out_dir):
 
         (excl
          .loc[excl['exclude'] == 1, id_col]
-         .to_csv(f'{out_dir}wexcl_' + gen + f'_{date}.' + ext,
+         .to_csv(f'{out_dir}/wexcl_' + gen + f'_{date}.' + ext,
                  header=False, index=False))
 
     d1 = date.today().strftime('%d %B %Y')
@@ -42,7 +42,7 @@ def exclude(withdrawal, fam, sample, out_dir):
         for ext in ['id', 'index']]
 
     # log
-    with open(f'{out_dir}wexcl_{d2}.log') as f:
+    with open(f'{out_dir}/wexcl_{d2}.log', 'w') as f:
         f.write(f'exclude.py log {d1}' + '\n')
         f.write('project id: ' + log_info['project_id'] + '\n')
         f.write('-----------------\n\n')

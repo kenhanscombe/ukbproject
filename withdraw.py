@@ -22,26 +22,25 @@ def withdraw_index(withdraw, fam, sample):
     w = pd.read_csv(withdraw, header=None, names=['id'])
     f = pd.read_csv(fam, sep=r'\s+', header=None,
                     names=['fid', 'iid', 'pid', 'mid', 'sex', 'phe'])
-    s = pd.read_csv(sample, sep=r'\s+', header=None, skiprows=[0, 1],
-                    names=['id1', 'id2', 'mis'])
+    s = pd.read_csv(sample, sep=r'\s+', skiprows=[1])
 
     w['exclude'] = 1
 
     f = pd.merge(f, w, how='left', left_on='fid', right_on='id', sort=False)
-    s = pd.merge(s, w, how='left', left_on='id1', right_on='id', sort=False)
+    s = pd.merge(s, w, how='left', left_on='ID_1', right_on='id', sort=False)
 
     f['exclude'] = f['exclude'].fillna(0).astype(int)
     s['exclude'] = s['exclude'].fillna(0).astype(int)
 
     # Include fam and sample negative ids
     f.loc[f['fid'].lt(0), 'exclude'] = 1
-    s.loc[s['id1'].lt(0), 'exclude'] = 1
+    s.loc[s['ID_1'].lt(0), 'exclude'] = 1
 
     # Add index
     f['index'] = [x + 1 for x in list(range(f.shape[0]))]
     s['index'] = [x + 1 for x in list(range(s.shape[0]))]
 
     f_exclude = f[['index', 'fid', 'exclude']]
-    s_exclude = s[['index', 'id1', 'exclude']]
+    s_exclude = s[['index', 'ID_1', 'exclude']]
 
     return f_exclude, s_exclude

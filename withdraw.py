@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 # Each project has (with project-specific ids) :
 # - w*.csv withdrawals file(s)
@@ -43,4 +44,19 @@ def withdraw_index(withdraw, fam, sample):
     f_exclude = f[['index', 'fid', 'exclude']]
     s_exclude = s[['index', 'ID_1', 'exclude']]
 
-    return f_exclude, s_exclude
+    # Log info
+    f_path = Path(fam)
+    project_dir = f_path.absolute().parent.parent.name
+
+    log_info = {'project_id': re.sub('ukb|_.*$', '', project_dir),
+                'withdrawal_n': w.shape[0],
+                'fam_n': f.shape[0],
+                'fam_negative_n': f.loc[f['fid'].lt(0)].shape[0],
+                'fam_in_withdrawal_n': sum(f['fid'].isin(w['id']).tolist()),
+                'fam_exclusion_n': f.loc[f['excluion'].eq(1)].shape[0],
+                'sample_n': s.shape[0],
+                'sample_negative_n': s.loc[s['fid'].lt(0)].shape[0],
+                'sample_in_withdrawal_n': sum(s['ID_1'].isin(w['id']).tolist()),
+                'sample_exclusion_n': s.loc[s['excluion'].eq(1)].shape[0]}
+
+    return f_exclude, s_exclude, log_info

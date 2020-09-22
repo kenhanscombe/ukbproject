@@ -47,21 +47,22 @@ def exclude(withdrawal, fam, sample, out_dir):
         f.write('project id: ' + log_info['project_id'] + '\n')
         f.write('-----------------\n\n')
 
-        f.write(log_info['withdrawal_n'] + ' withdrawal file IDs\n')
+        f.write(str(log_info['withdrawal_n']) + ' withdrawal file IDs\n')
 
-        f.write(log_info['fam_n'] + ' fam file IDs\n')
-        f.write(log_info['fam_negative_n'] + ' fam file negative IDs\n')
-        f.write(log_info['fam_in_withdrawal_n'] +
+        f.write(str(log_info['fam_n']) + ' fam file IDs\n')
+        f.write(str(log_info['fam_negative_n']) + ' fam file negative IDs\n')
+        f.write(str(log_info['fam_in_withdrawal_n']) +
                 ' fam file IDs in withdrawal file\n')
-        f.write(log_info['fam_exclusion_n'] +
+        f.write(str(log_info['fam_exclusion_n']) +
                 f' exclusion IDs for genotyped genetic data written to excl_gen_{d2}.id;',
                 f' indices written to excl_gen_{d2}.index' + '\n')
 
-        f.write(log_info['sample_n'] + ' sample file IDs\n')
-        f.write(log_info['sample_negative_n'] + ' sample file negative IDs\n')
-        f.write(log_info['sample_in_withdrawal_n'] +
+        f.write(str(log_info['sample_n']) + ' sample file IDs\n')
+        f.write(str(log_info['sample_negative_n']) +
+                ' sample file negative IDs\n')
+        f.write(str(log_info['sample_in_withdrawal_n']) +
                 ' sample file IDs in withdrawal file\n')
-        f.write(log_info['sample_exclusion_n'] +
+        f.write(str(log_info['sample_exclusion_n']) +
                 f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;',
                 f' indices written to excl_imp_{d2}.index' + '\n')
 

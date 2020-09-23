@@ -22,11 +22,11 @@ Clone the github repo
 git clone https://github.com/kenhanscombe/ukbgen.git
 
 virtualenv venv
-. venv/bin/activate
+source venv/bin/activate
 python3 -m pip install --editable .
 ```
 
-To exit the virtual environment after use of the tool (below), use `deactivate`.
+After use (below), exit the virtual environment with `deactivate`. To use `exclude` on subsequent occasions, simply activate the environment `source venv/bin/activate`.
 
 ## Use
 

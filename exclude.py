@@ -10,14 +10,14 @@ from datetime import date
 @click.option('-s', '--sample', help='Path to the sample file.')
 @click.option('-o', '--out-dir', default='.')
 def exclude(withdrawal, fam, sample, out_dir):
-    """Writes a file of withdrawal ids (.exclude) and a corresponding
-    file of indeces (.index), to remove from the genotyped and imputed
+    """Writes a file of withdrawal ids (wexcl*.id) and a corresponding
+    file of indeces (wexcl*.index), to remove from the genotyped and imputed
     data. These withdrawal ids are a combination of ids in the
-    withdrawals file and ids with the values 'dropout' or 'redacted'
-    in the phenotype column of the fam file. The *_withdrawals.exclude
-    file is accepted by PLINK --remove and QCTOOL --excl-samples, for
-    genotyped and imputed files respectively. Both .exclude and .index
-    files are one-per-line no header."""
+    withdrawals file and negtive ids in the fam and sample files. A
+    log of withdrawal id and sample information counts is written to
+    (wexcl*.log) The wexcl*.id files are accepted by PLINK --remove and
+    QCTOOL --excl-samples, for genotyped and imputed files respectively. Both
+    wexcl*.id and wexcl*.index files are one-per-line no header."""
     f_exclude, s_exclude, log_info = withdraw.withdraw_index(
         withdrawal, fam, sample)
 
@@ -65,7 +65,3 @@ def exclude(withdrawal, fam, sample, out_dir):
         f.write(str(log_info['sample_exclusion_n']) +
                 f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;' +
                 f' indices written to excl_imp_{d2}.index' + '\n')
-
-
-# if __name__ == "__main__":
-#     exclude()

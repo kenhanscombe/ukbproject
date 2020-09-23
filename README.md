@@ -21,8 +21,12 @@ Clone the github repo
 ```{bash}
 git clone https://github.com/kenhanscombe/ukbgen.git
 
+virtualenv venv
+. venv/bin/activate
 python3 -m pip install --editable .
 ```
+
+To exit the virtual environment after use of the tool (below), use `deactivate`.
 
 ## Use
 

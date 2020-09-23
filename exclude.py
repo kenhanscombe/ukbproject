@@ -67,5 +67,5 @@ def exclude(withdrawal, fam, sample, out_dir):
                 f' indices written to excl_imp_{d2}.index' + '\n')
 
 
-if __name__ == "__main__":
-    exclude()
+# if __name__ == "__main__":
+#     exclude()

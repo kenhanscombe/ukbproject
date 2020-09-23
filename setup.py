@@ -6,8 +6,8 @@ setup(
     py_modules=['exclude'],
     install_requires=[
         'Click',
-        'pandas >= 1.1.1',
-        'numpy >= 1.19.1'
+        'pandas',
+        'numpy'
     ],
     entry_points='''
         [console_scripts]

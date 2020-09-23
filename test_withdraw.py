@@ -49,36 +49,33 @@ class TestWithdraw(unittest.TestCase):
 
         sample_df.to_csv(cls.sample_path, sep=' ', index=False)
 
+        cls.f_exclude, cls.s_exclude, cls.log_info = withdraw.withdraw_index(
+            withdraw=cls.withdraw_path,
+            fam=cls.fam_path,
+            sample=cls.sample_path)
+
     @ classmethod
     def tearDownClass(cls):
         cls.temp_dir.cleanup()
 
-    def test_withdraw_index(self):
-        """Is a non-empty dataframe"""
-        f_exclude, s_exclude = withdraw.withdraw_index(
-            withdraw=self.withdraw_path,
-            fam=self.fam_path,
-            sample=self.sample_path
-        )
+    def test_exclusions(self):
+        """Withdrawal exclusions are non empty"""
+        self.assertTrue(not self.f_exclude.empty)
+        self.assertTrue(not self.s_exclude.empty)
+        self.assertTrue(isinstance(self.log_info, dict) &
+                        bool(self.log_info))
 
-        print('fam exclude file:', f_exclude.shape)
-        print(f_exclude.head())
-        print(f_exclude['exclude'].value_counts(), '\n')
-
-        print('sample exclude file:', s_exclude.shape)
-        print(s_exclude.head())
-        print(s_exclude['exclude'].value_counts(), '\n')
-
-        # path exists (handle error, test its caught)
-        # is a pd.DataFrame
-        # is not empty
-        # withdrawal ids are in fam/ sample
-        # self.assertIsInstance(w, pd.DataFrame)
-        # self.assertIsInstance(f, pd.DataFrame)
-        # self.assertIsInstance(s, pd.DataFrame)
-        # self.assertTrue(not w.empty)
-        # self.assertTrue(not f.empty)
-        # self.assertTrue(not s.empty)
+    def test_counts(self):
+        """Total withdrawal exclusions are the sum of negative ids and
+        withdrawal ids in sample information file"""
+        self.assertEqual(
+            self.log_info['fam_negative_n'] +
+            self.log_info['fam_in_withdrawal_n'],
+            self.log_info['fam_exclusion_n'])
+        self.assertEqual(
+            self.log_info['sample_negative_n'] +
+            self.log_info['sample_in_withdrawal_n'],
+            self.log_info['sample_exclusion_n'])
 
 
 if __name__ == '__main__':

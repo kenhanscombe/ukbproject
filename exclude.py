@@ -1,6 +1,7 @@
 import click
 import withdraw
 from datetime import date
+from pathlib import Path
 
 
 @click.command()
@@ -8,7 +9,7 @@ from datetime import date
               help='Path to the withdrawal file.')
 @click.option('-f', '--fam', help='Path to the fam file.')
 @click.option('-s', '--sample', help='Path to the sample file.')
-@click.option('-o', '--out-dir', default='.')
+@click.option('-o', '--out-dir', default='withdrawals', help='Name of the directory to write withdrawal exclusions and log (default is "withdrawals")')
 def exclude(withdrawal, fam, sample, out_dir):
     """Writes a file of withdrawal ids (wexcl*.id) and a corresponding
     file of indeces (wexcl*.index), to remove from the genotyped and imputed
@@ -21,7 +22,13 @@ def exclude(withdrawal, fam, sample, out_dir):
     f_exclude, s_exclude, log_info = withdraw.withdraw_index(
         withdrawal, fam, sample)
 
-    def write_excl(excl, gen, ext, date=date.today().strftime('%d%m%Y')):
+    # Assuming the fam file is in genotyped/ (as it should be)
+    p = Path(fam)
+    project_dir = p.absolute().parent
+    (project_dir / out_dir).mkdir(exist_ok=True)
+    # out = str(project_dir / out_dir)
+    
+    def write_excl(excl, gen, ext, out=out_dir, date=date.today().strftime('%d%m%Y')):
         if (gen == 'genotyped') & (ext == 'id'):
             id_col = 'fid'
         elif (gen == 'imputed') & (ext == 'id'):
@@ -31,8 +38,9 @@ def exclude(withdrawal, fam, sample, out_dir):
 
         (excl
          .loc[excl['exclude'] == 1, id_col]
-         .to_csv(f'{out_dir}/wexcl_' + gen + f'_{date}.' + ext,
+         .to_csv(f'{out}/wexcl_' + gen + f'_{date}.' + ext,
                  header=False, index=False))
+
 
     d1 = date.today().strftime('%d %B %Y')
     d2 = date.today().strftime('%d%m%Y')

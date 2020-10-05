@@ -1,8 +1,8 @@
 ukbproject
 ===
 
-[![travis-ci](https://travis-ci.com/kenhanscombe/ukbgen.svg?branch=master)](https://travis-ci.com/github/kenhanscombe/ukbgen)
-[![codecov](https://codecov.io/gh/kenhanscombe/ukbgen/branch/master/graph/badge.svg)](https://codecov.io/gh/kenhanscombe/ukbgen)
+[![travis-ci](https://travis-ci.com/kenhanscombe/ukbproject.svg?branch=master)](https://travis-ci.com/github/kenhanscombe/ukbproject)
+[![codecov](https://codecov.io/gh/kenhanscombe/ukbproject/branch/master/graph/badge.svg)](https://codecov.io/gh/kenhanscombe/ukbproject)
 
 A python CLI to setup a UK Biobank (UKB) project.
 

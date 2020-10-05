@@ -6,9 +6,7 @@ ukbproject
 
 A python CLI to setup a UK Biobank (UKB) project.
 
-**Important: At the moment, because default paths specific to the KCL HOC cluster, this CLI is only useful for UKB-approved KCL reasearchers and their collaborators, with an account on the Rosalind HPC cluster. This python3 project is in alpha development.**
-
-<br>
+**Important: At the moment, because default paths are specific to the KCL HPC cluster, this CLI is only useful for UKB-approved KCL reasearchers and their collaborators, with an account on the Rosalind HPC cluster. This python3 project is in alpha development.**
 
 ## Installation
 
@@ -35,8 +33,6 @@ python3 -m pip install --editable .
 ```
 
 After use (below), exit the environment with `conda deactivate`. To use the `ukb` CLI on subsequent occasions, simply activate the environment `conda activate ukb-env`.
-
-<br>
 
 ## Use
 

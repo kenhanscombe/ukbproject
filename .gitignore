@@ -1,6 +1,6 @@
 .vscode
+.snakemake
 rosalind-env
-venv
 __pycache__
 *.egg-info
-temp
+fields.ukb

@@ -1,47 +1,69 @@
-ukbgen
+ukbproject
 ===
 
 [![travis-ci](https://travis-ci.com/kenhanscombe/ukbgen.svg?branch=master)](https://travis-ci.com/github/kenhanscombe/ukbgen)
 [![codecov](https://codecov.io/gh/kenhanscombe/ukbgen/branch/master/graph/badge.svg)](https://codecov.io/gh/kenhanscombe/ukbgen)
 
-A python module and CLI to generate exclusion lists as input for
-qctool v2 `--excl-samples` and plink 1.9/ 2.0 `--remove`. The
-exclusions are a combination of withdrawals and samples with negative
-ids (marked as 'redacted*' or 'dropout*' in the phenotype column of
-the project .fam file).
+A python CLI to setup a UK Biobank (UKB) project.
 
-**Note. This python3 project is in alpha development**.
+**Important: At the moment, because default paths specific to the KCL HOC cluster, this CLI is only useful for UKB-approved KCL reasearchers and their collaborators, with an account on the Rosalind HPC cluster. This python3 project is in alpha development.**
 
-> KCL Rosalind users load the default python3 module (`module avail python3` then `module load <default_python3_module>`).
+<br>
 
 ## Installation
 
 Clone the github repo
 
 ```{bash}
-git clone https://github.com/kenhanscombe/ukbgen.git
+git clone https://github.com/kenhanscombe/ukbproject.git
+chmod +x munge.py
+```
 
-virtualenv venv
-source venv/bin/activate
+KCL Rosalind users load the default python3 module
+
+```{bash}
+module avail python3
+module load <default_python3_module>
+```
+
+Create and load the conda environment
+
+```{bash}
+conda env create -f environment.yml
+conda activate ukb-env
 python3 -m pip install --editable .
 ```
 
-After use (below), exit the virtual environment with `deactivate`. To use `exclude` on subsequent occasions, simply activate the environment `source venv/bin/activate`.
+After use (below), exit the environment with `conda deactivate`. To use the `ukb` CLI on subsequent occasions, simply activate the environment `conda activate ukb-env`.
+
+<br>
 
 ## Use
 
 For help
 
 ```{bash}
-exclude --help
+ukb --help
 ```
 
-To create exclusion files for genotyped and imputed data
+>**Usage**: ukb [OPTIONS] COMMAND [ARGS]...
+>
+>  Sets up a UKB project on Rosalind storing common data and utilities in the
+>  parent directory, at resources/ and bin/ respectively.
+>
+>**Options**:  
+>  --version  Show the version and exit.  
+>  --help     Show this message and exit.
+>
+>**Commands**:  
+>  clean     Removes defunct file/dir(s) from projects, and sets permissions.  
+>  create    Creates a skeleton UKB project directory.  
+> ...
+
+<br>
+
+Notice usage is similar to `git` with general **options**, and **commands** that take further arguments. For help on commands (e.g. `ukb create`)
 
 ```{bash}
-exclude \
---withdraw <withdrawal_file> \
---fam <fam_file> \
---sample <sample_file> \
---out-dir <output_directory>
+ukb create --help
 ```

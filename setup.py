@@ -1,16 +1,17 @@
 from setuptools import setup
 
 setup(
-    name='exclude',
+    name='ukbproject',
     version='0.1',
-    py_modules=['exclude'],
+    py_modules=['ukb'],
     install_requires=[
         'Click',
         'pandas',
-        'numpy'
+        'numpy',
+        'bs4'
     ],
     entry_points='''
         [console_scripts]
-        exclude=exclude:exclude
+        ukb=ukb:cli
     ''',
 )

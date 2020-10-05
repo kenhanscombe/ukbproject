@@ -121,7 +121,6 @@ def create_parser():
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    args = parser.parse_args()
 
     m = UKBMunger(args.html, args.basket, args.out_dir)
     m.munge_html()

@@ -10,6 +10,8 @@ KCL HPC cluster, this CLI is only useful for UKB-approved KCL
 reasearchers and their collaborators, with an account on the Rosalind
 HPC cluster. This python3 project is in alpha development.**
 
+<br>
+
 <span style="color:dodgerblue;">**Contents:**</span>  
 1. [Installation](#installation)
 2. [Use](#use)  
@@ -21,6 +23,8 @@ HPC cluster. This python3 project is in alpha development.**
 3. [Access the data with ukbkings](#access)  
 4. [Additional withdrawals](#withdrawals)  
 5. [Updates to phenotype data](#updates)
+
+<br>
 
 ***
 
@@ -66,19 +70,23 @@ For help
 ukb --help
 ```
 
->**Usage**: ukb [OPTIONS] COMMAND [ARGS]...
->
-> Sets up a UKB project on Rosalind storing common data and utilities
-> in the parent directory, at resources/ and bin/ respectively.
->
-> **Options**:  
-> --version  Show the version and exit.  
-> --help     Show this message and exit.
->
-> **Commands**:  
-> clean     Removes defunct file/dir(s) from projects, and sets permissions.  
-> create    Creates a skeleton UKB project directory.  
-> ...
+<pre>
+Usage: ukb [OPTIONS] COMMAND [ARGS]...
+
+Sets up a UKB project on Rosalind storing common data and utilities in the parent directory, at resources/ and bin/ respectively.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  clean     Removes defunct file/dir(s) from projects, and sets permissions.
+  create    Creates a skeleton UKB project directory.
+  link      Makes links to sample information and relatedness files.
+  munge     Runs rules described in the Snakefile to munge UKB data.
+  util      Downloads UKB file handlers and utilities.
+  withdraw  Writes withdrawal IDs and corresponding indeces to be excluded.
+</pre>
 
 <br>
 

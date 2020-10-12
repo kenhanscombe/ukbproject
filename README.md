@@ -11,19 +11,22 @@ reasearchers and their collaborators, with an account on the Rosalind
 HPC cluster. This python3 project is in alpha development.**
 
 <span style="color:dodgerblue;">**Contents:**</span>  
-[1. Installation]  
-[2. Use]  
-[2.1 Setup a project directory]  
-[2.2 Download UKB utilities]  
-[2.3 Include project data]  
-[2.4 Munge the UKB data]  
-[2.5 Add symlinks to sample information and relatedness files]  
-[3. Access the data with ukbkings]  
-[4. Additional withdrawals]  
-[5. Updates to phenotype data]
+1. [Installation](#installation)
+2. [Use](#use)  
+2.1 [Setup a project directory](#setup)  
+2.2 [Download UKB utilities](#download)  
+2.3 [Include project data](#include)  
+2.4 [Munge the UKB data](#munge)  
+2.5 [Add symlinks to sample information and relatedness files](#add)  
+3. [Access the data with ukbkings](#access)  
+4. [Additional withdrawals](#withdrawals)  
+5. [Updates to phenotype data](#updates)
 
 ***
 
+<br>
+
+<a name="installation"></a>
 ## 1. Installation
 
 Clone the github repo
@@ -52,6 +55,9 @@ After use (below), exit the environment with `conda deactivate`. To use
 the `ukb` CLI on subsequent occasions, simply activate the environment
 `conda activate ukb-env`.
 
+<br>
+
+<a name="use"></a>
 ## 2. Use
 
 For help
@@ -86,6 +92,7 @@ ukb create --help
 
 <br>
 
+<a name="setup"></a>
 ### 2.1 Setup a project directory
 
 At /scratch/datasets/ukbiobank, create a project
@@ -123,6 +130,7 @@ ukb&ltproject_id&gt
 
 <br>
 
+<a name="download"></a>
 ### 2.2 Download UKB utilities
 
 Add UKB file handlers and utilities to the parent directory
@@ -132,6 +140,7 @@ downloaded to resources/; UKB programs are downloaded to bin/.
 
 <br>
 
+<a name="include"></a>
 ### 2.3 Include project data
 
 #### 2.3.1 Encrypted phenotype data, keys, withdrawals
@@ -161,6 +170,7 @@ cd /scratch/datasets/ukbiobank/ukb_<project_id>/raw/
 
 <br>
 
+<a name="munge"></a>
 ### 2.4 Munge the UKB data
 
 Process the encrypted UKB files into formats to be read by ukbkings.
@@ -191,6 +201,7 @@ ukb&ltproject_id&gt
 
 <br>
 
+<a name="add"></a>
 ### 2.5 Add symlinks to sample information and relatedness files
 
 Sample information files (.fam and .sample) and the relatedness file
@@ -233,6 +244,7 @@ N = number of samples with non-negative IDs
 
 <br>
 
+<a name="access"></a>
 ### 3. Access the data with ukbkings
 
 The data should now be available from anywhere on Rosalind through
@@ -248,6 +260,7 @@ vignette("Access UKB data on Rosalind")
 
 <br>
 
+<a name="withdrawals"></a>
 ## 4. Additional withdrawals
 
 Each time an updated set of participant withdrawals is received,
@@ -259,6 +272,7 @@ this would apply the latest set of withdrawals.
 
 <br>
 
+<a name="updates"></a>
 ## 5. Updates to phenotype data
 
 If you receive any new data you would like to incorporate, place the

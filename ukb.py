@@ -62,7 +62,7 @@ def clean(ctx, project_dir, users):
     ukb_dir = ctx.obj['ukbiobank']
     prj_dir = ukb_dir / project_dir
 
-    for x in ['src', 'R', 'resources',
+    for x in ['src', 'R', 'resources', 'returns',
               'Snakefile', 'snake.py', 'project.py', 'link.py', 'fields.ukb']:
         os.system(f'rm -rf {prj_dir}/{x}')
 
@@ -70,12 +70,10 @@ def clean(ctx, project_dir, users):
     if users:
         os.system(f'setfacl -R -b {prj_dir}')
         for u in users:
-            os.system(f'''
-                      setfacl -R -m u:{u}:rwx {prj_dir}
-                      setfacl -R -dm u:{u}:rwx {prj_dir}''')
-    
+            os.system(f'setfacl -R -m u:{u}:rw-,d:u:{u}:rw-,g::r--,m::rw- {prj_dir}')
+
     # add new subdirectories
-    for d in ['returns', 'withdrawals']:
+    for d in ['withdrawals']:
         (ukb_dir / project_dir / d).mkdir(exist_ok=True)
 
 
@@ -101,14 +99,13 @@ def create(ctx, project_id, users):
     
     # setfacl
     os.system(f'setfacl -b {ukb_dir}/{project_dir}')
+
     for u in users:
-        os.system(f'''
-              setfacl -R -m u:{u}:rwx {ukb_dir}/{project_dir}
-              setfacl -R -dm u:{u}:rwx {ukb_dir}/{project_dir}''')
+        os.system(f'setfacl -R -m u:{u}:rw-,d:u:{u}:rw-,g::r--,m::rw- {ukb_dir}/{project_dir}')
 
     # make subdirectories
     for d in ['genotyped', 'imputed', 'raw',
-              'log', 'phenotypes', 'returns', 'withdrawals']:
+              'log', 'phenotypes', 'withdrawals']:
         (ukb_dir / project_dir / d).mkdir()
 
     # symlink genetic data

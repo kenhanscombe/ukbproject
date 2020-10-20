@@ -1,8 +1,14 @@
 import click
 import os
+import re
+import glob
 import sys
+import sqlite3
+import pandas as pd
+import numpy as np
 
 from withdraw import withdraw_index
+from recdtype import record_col_types
 from datetime import date
 from pathlib import Path
 
@@ -73,7 +79,7 @@ def clean(ctx, project_dir, users):
             os.system(f'setfacl -R -m u:{u}:rw-,d:u:{u}:rw-,g::r--,m::rw- {prj_dir}')
 
     # add new subdirectories
-    for d in ['withdrawals']:
+    for d in ['withdrawals', 'records']:
         (ukb_dir / project_dir / d).mkdir(exist_ok=True)
 
 
@@ -262,3 +268,45 @@ def withdraw(withdrawal, fam, sample, out_dir):
         f.write(str(log_info['sample_exclusion_n']) +
                 f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;' +
                 f' indices written to excl_imp_{d2}.index' + '\n')
+
+
+@cli.command()
+@click.option('-p', '--project-dir', help='Name of project directory')
+@click.option('-r', '--record', multiple=True)
+@click.pass_context
+def recdb(ctx, project_dir, record):
+    """Adds UKB record-level data to sqlite DB."""
+    pkg_dir = ctx.obj['pkg_dir']
+    project_dir = pkg_dir.parent / project_dir
+    raw_dir = project_dir / 'raw'
+    record_dir = project_dir / 'records'
+    record_files = []
+
+    for rec in record:
+        record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
+        
+    con_rec = sqlite3.connect(record_dir / 'records.db')
+
+    includes_covid = any(['covid' in f for f in record_files])
+    if includes_covid:
+        con_cov = sqlite3.connect(record_dir / 'covid.db')
+    
+    for f in record_files:
+        table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
+        print('Reading', table_name + '...')
+        
+        if table_name == 'gp_clinical':
+            df = pd.read_table(raw_dir / f, header=0, encoding='latin1')
+        else:
+            df = pd.read_table(raw_dir / f, header=0)
+
+        if table_name.startswith('covid'):
+            df.to_sql(table_name, con_cov, if_exists='replace', index=False,
+                      dtype=record_col_types[table_name])
+        else:
+            df.to_sql(table_name, con_rec, if_exists='replace', index=False,
+                      dtype=record_col_types[table_name])
+
+    con_rec.close()
+    if includes_covid:
+        con_cov.close()

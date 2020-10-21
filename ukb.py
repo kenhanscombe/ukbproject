@@ -272,7 +272,8 @@ def withdraw(withdrawal, fam, sample, out_dir):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
-@click.option('-r', '--record', multiple=True)
+@click.option('-r', '--record', multiple=True,
+              help='Name of the record – x will match x*')
 @click.pass_context
 def recdb(ctx, project_dir, record):
     """Adds UKB record-level data to sqlite DB."""
@@ -295,7 +296,7 @@ def recdb(ctx, project_dir, record):
         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
         print('Reading', table_name + '...')
         
-        if table_name == 'gp_clinical':
+        if table_name.startswith('gp_'):
             df = pd.read_table(raw_dir / f, header=0, encoding='latin1')
         else:
             df = pd.read_table(raw_dir / f, header=0)

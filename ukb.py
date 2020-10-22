@@ -4,7 +4,7 @@ import re
 import glob
 import sys
 import sqlite3
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 
 from withdraw import withdraw_index
@@ -76,7 +76,7 @@ def clean(ctx, project_dir, users):
     if users:
         os.system(f'setfacl -R -b {prj_dir}')
         for u in users:
-            os.system(f'setfacl -R -m u:{u}:rw-,d:u:{u}:rw-,g::r--,m::rw- {prj_dir}')
+            os.system(f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {prj_dir}')
 
     # add new subdirectories
     for d in ['withdrawals', 'records']:
@@ -107,7 +107,7 @@ def create(ctx, project_id, users):
     os.system(f'setfacl -b {ukb_dir}/{project_dir}')
 
     for u in users:
-        os.system(f'setfacl -R -m u:{u}:rw-,d:u:{u}:rw-,g::r--,m::rw- {ukb_dir}/{project_dir}')
+        os.system(f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {ukb_dir}/{project_dir}')
 
     # make subdirectories
     for d in ['genotyped', 'imputed', 'raw',
@@ -294,19 +294,22 @@ def recdb(ctx, project_dir, record):
     
     for f in record_files:
         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
-        print('Reading', table_name + '...')
         
+        print('Reading', table_name + '...')
         if table_name.startswith('gp_'):
-            df = pd.read_table(raw_dir / f, header=0, encoding='latin1')
+            df = pd.read_table(raw_dir / f, header=0, encoding='ISO-8859-1')
         else:
             df = pd.read_table(raw_dir / f, header=0)
 
+        print('Writing', table_name + ' to SQL db...')
         if table_name.startswith('covid'):
-            df.to_sql(table_name, con_cov, if_exists='replace', index=False,
-                      dtype=record_col_types[table_name])
+            df._to_pandas().to_sql(table_name, con_cov, if_exists='replace',
+                                   index=False, chunksize=50_000,
+                                   dtype=record_col_types[table_name])
         else:
-            df.to_sql(table_name, con_rec, if_exists='replace', index=False,
-                      dtype=record_col_types[table_name])
+            df._to_pandas().to_sql(table_name, con_rec, if_exists='replace',
+                                   index=False, chunksize=50_000,
+                                   dtype=record_col_types[table_name])
 
     con_rec.close()
     if includes_covid:

@@ -23,7 +23,6 @@ rule all:
         expand(f'{project_dir}/phenotypes/ukb{{id}}.csv', id=dataset_ids),
         expand(f'{project_dir}/phenotypes/ukb{{id}}.html', id=dataset_ids),
         expand(f'{project_dir}/phenotypes/ukb{{id}}_field_finder.txt', id=dataset_ids)
-        # f'{project_dir}/phenotypes/ukb.field'
 
 
 rule ukbunpack_decrypt:
@@ -31,7 +30,7 @@ rule ukbunpack_decrypt:
         enc = f'{project_dir}/raw/ukb{{id}}.enc',
         key = f'{project_dir}/raw/ukb{{id}}.key'
     output:
-        temp(f'{project_dir}/raw/ukb{{id}}.enc_ukb')
+        f'{project_dir}/raw/ukb{{id}}.enc_ukb'
     shell:
         '''
         {ukbunpack} {input.enc} {input.key}
@@ -71,25 +70,3 @@ rule munge_ukb_html:
             --basket {{params.basket}} \
             --out-dir {{params.out_dir}}
         '''
-
-
-# rule concatenate_field_finders:
-#     input:
-#         expand('phenotypes/ukb{id}_field_finder.txt', id=dataset_ids)
-#     output:
-#         'phenotypes/ukb.field'
-#     run:
-#         with open('phenotypes/ukb.field', "wb") as wf:
-
-#             with open(
-#                     "phenotypes/ukb{}_field_finder.txt".format(dataset_ids[0]),
-#                     "rb") as rf:
-#                 header = [next(rf) for lines in range(1)]
-#                 wf.write(header[0])
-
-#             for id in dataset_ids:
-#                 with open(
-#                         "phenotypes/ukb{}_field_finder.txt".format(id),
-#                         "rb") as rf:
-#                     next(rf)
-#                     wf.write(rf.read())

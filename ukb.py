@@ -195,17 +195,15 @@ def munge(ctx, project_dir, dry_run):
 
 
 @cli.command()
-@click.option('-w', '--withdrawal',
-              help='Path to the withdrawal file.')
-@click.option('-f', '--fam', help='Path to the fam file.')
-@click.option('-s', '--sample', help='Path to the sample file.')
+@click.option('-p', '--project-dir', help='Name of project directory')
 @click.option('-o', '--out-dir', default='withdrawals',
               help='''Name of the directory to write withdrawal exclusions and
               log (default is "withdrawals")''')
 # @click.option('-r', '--remove', is_flag=True,
 #               help='''Remove withdrawals from genetic analysis. IDs in fam and
 #               sample files changed to sequence of negative integers''')
-def withdraw(withdrawal, fam, sample, out_dir):
+@click.pass_context
+def withdraw(ctx, project_dir, out_dir):
     """
     Writes withdrawal IDs and corresponding indeces to be excluded.
     
@@ -214,16 +212,15 @@ def withdraw(withdrawal, fam, sample, out_dir):
     files (.fam and .sample), and negative IDs in the fam and sample files. A
     log of withdrawal and sample information counts is written.
     """
-    f_exclude, s_exclude, log_info = withdraw.withdraw_index(
-        withdrawal, fam, sample)
+    ukb_dir = ctx.obj['ukbiobank']
+    prj_dir = ukb_dir / project_dir
 
-    # Assuming the fam file is in genotyped/ (as it should be)
-    p = Path(fam)
-    project_dir = p.absolute().parent
-    (project_dir / out_dir).mkdir(exist_ok=True)
-    # out = str(project_dir / out_dir)
+    f_exclude, s_exclude, log_info = withdraw_index(prj_dir)
+
+    (prj_dir / out_dir).mkdir(exist_ok=True)
     
-    def write_excl(excl, gen, ext, out=out_dir, date=date.today().strftime('%d%m%Y')):
+    def write_excl(excl, gen, ext, out=out_dir,
+                   date=date.today().strftime('%d%m%Y')):
         if (gen == 'genotyped') & (ext == 'id'):
             id_col = 'fid'
         elif (gen == 'imputed') & (ext == 'id'):
@@ -233,7 +230,7 @@ def withdraw(withdrawal, fam, sample, out_dir):
 
         (excl
          .loc[excl['exclude'] == 1, id_col]
-         .to_csv(f'{out}/wexcl_' + gen + f'_{date}.' + ext,
+         .to_csv(f'{prj_dir}/{out}/wexcl_' + gen + f'_{date}.' + ext,
                  header=False, index=False))
 
 
@@ -245,7 +242,7 @@ def withdraw(withdrawal, fam, sample, out_dir):
         for ext in ['id', 'index']]
 
     # log
-    with open(f'{out_dir}/wexcl_{d2}.log', 'w') as f:
+    with open(f'{prj_dir}/{out_dir}/wexcl_{d2}.log', 'w') as f:
         f.write(f'exclude.py log {d1}' + '\n\n')
         f.write('project id: ' + log_info['project_id'] + '\n')
         f.write('-----------------\n')

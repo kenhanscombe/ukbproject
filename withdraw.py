@@ -1,4 +1,5 @@
 import pandas as pd
+import glob
 import re
 from pathlib import Path
 
@@ -14,17 +15,27 @@ from pathlib import Path
 # TODO: Can I delete from bed/bgen only (can't delete in fam/sample?)
 
 
-def withdraw_index(withdraw, fam, sample):
-    """Writes indeces of samples to keep and remove
+def withdraw_index(project_dir):
+    """Writes indeces of samples to keep and remove.
 
     withdraw (str): Path to the withdrawals file
     fam (str): Path to the fam file
     sample (str): Path to the sample file
     """
-    w = pd.read_csv(withdraw, header=None, names=['id'])
-    f = pd.read_csv(fam, sep=r'\s+', header=None,
+    ukb_dir = Path('/scratch/datasets/ukbiobank')
+    prj_dir = ukb_dir / project_dir
+
+    withdrawal_files = glob.glob(str(prj_dir / 'raw/w*csv'))
+    fam_file = glob.glob(str(prj_dir / 'raw/*fam'))[0]
+    sample_file = glob.glob(str(prj_dir / 'raw/*sample'))[0]
+
+    wdfs = (pd.read_csv(w, header=None, names=['id']) for w in withdrawal_files)
+    wdfs_cat = pd.concat(wdfs)
+    
+    w = pd.DataFrame({'id': wdfs_cat.id.unique()})
+    f = pd.read_csv(fam_file, sep=r'\s+', header=None,
                     names=['fid', 'iid', 'pid', 'mid', 'sex', 'phe'])
-    s = pd.read_csv(sample, sep=r'\s+', skiprows=[1])
+    s = pd.read_csv(sample_file, sep=r'\s+', skiprows=[1])
 
     w['exclude'] = 1
 
@@ -46,10 +57,7 @@ def withdraw_index(withdraw, fam, sample):
     s_exclude = s[['index', 'ID_1', 'exclude']]
 
     # Log info
-    f_path = Path(fam)
-    project_dir = f_path.absolute().parent.parent.name
-
-    log_info = {'project_id': re.sub('ukb|_.*$', '', project_dir),
+    log_info = {'project_id': re.sub('ukb|_.*$', '', str(project_dir)),
                 'withdrawal_n': w.shape[0],
                 'fam_n': f.shape[0],
                 'fam_negative_n': f.loc[f['fid'].lt(0)].shape[0],

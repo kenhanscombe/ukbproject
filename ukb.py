@@ -61,7 +61,7 @@ def util(ctx):
 @click.pass_context
 def clean(ctx, project_dir, users):
     """
-    Removes defunct file/dir(s) from projects, and sets permissions.
+    Deletes defunct file/dir(s) from projects, and sets permissions.
 
     USERS A whitespace separated list of uids to grant rwx permission.
     """
@@ -195,13 +195,13 @@ def munge(ctx, project_dir, dry_run):
 
 
 @cli.command()
+# @click.option('--yes', is_flag=True, callback=abort_if_false,
+#               expose_value=False,
+#               prompt='Have you downloaded the latest fam and sample file?')
 @click.option('-p', '--project-dir', help='Name of project directory')
 @click.option('-o', '--out-dir', default='withdrawals',
               help='''Name of the directory to write withdrawal exclusions and
               log (default is "withdrawals")''')
-# @click.option('-r', '--remove', is_flag=True,
-#               help='''Remove withdrawals from genetic analysis. IDs in fam and
-#               sample files changed to sequence of negative integers''')
 @click.pass_context
 def withdraw(ctx, project_dir, out_dir):
     """
@@ -265,6 +265,85 @@ def withdraw(ctx, project_dir, out_dir):
         f.write(str(log_info['sample_exclusion_n']) +
                 f' exclusion IDs for imputed genetic data written to excl_imp_{d2}.id;' +
                 f' indices written to excl_imp_{d2}.index' + '\n')
+
+
+@cli.command()
+@click.option('-p', '--project-dir', help='Name of project directory')
+# @click.option('--yes', is_flag=True, callback=abort_if_false,
+#               expose_value=False,
+#               prompt='Have you created a list of withdrawals with ukb-withdraw?')
+@click.pass_context
+def remove(ctx, project_dir):
+    '''Removes withdrawals from latest sample information.
+    
+    Downloads the latest fam and sample files, replaces withdrawal
+    IDs with negative integer sequence, adds symlinks to updated sample
+    fam and sample files to genotyped and imputed respectively.
+    '''
+    ukb_dir = ctx.obj['ukbiobank']
+    prj_dir = ukb_dir / project_dir
+    rem_dir = prj_dir / 'withdrawals'
+
+    fam_file = max(glob.glob(str(prj_dir / 'raw/*fam')), key=os.path.getctime)
+    fam_names = ['fid', 'iid', 'pid', 'mid', 'sex', 'phe']
+    fam_dtypes = dict(zip(fam_names, (['Int64'] * (len(fam_names) - 1)) + ['string']))
+    fam = pd.read_table(fam_file, header=None, sep=' ', names=fam_names,
+                        dtype=fam_dtypes)
+
+    sample_file = max(glob.glob(str(prj_dir / 'raw/*sample')), key=os.path.getctime)
+    sample_names = ['ID_1', 'ID_2', 'missing', 'sex']
+    sample_dtypes = dict(zip(sample_names, (['Int64'] * len(sample_names))))
+    sample = pd.read_table(sample_file, sep=' ', skiprows=[1], dtype=sample_dtypes)
+    
+    gen_rem_file = max(glob.glob(str(rem_dir / '*genotyped*id')), key=os.path.getctime)
+    gen_rem = pd.read_table(gen_rem_file, header=None, names=['id'])
+
+    imp_rem_file = max(glob.glob(str(rem_dir / '*imputed*id')), key=os.path.getctime)
+    imp_rem = pd.read_table(imp_rem_file, header=None, names=['id'])
+    
+
+    def rem_id_dict(rem):
+        """Returns a dict of replacement negative IDs"""
+        id_min = rem.id.min()
+        
+        for row in range(rem.shape[0]):
+            if rem.loc[row, 'id'] > 0:
+                id_min -= 1
+                rem.loc[row, 'new_id'] = id_min
+            else:
+                rem.loc[row, 'new_id'] = rem.loc[row, 'id']
+
+        rem = rem.loc[rem.id.gt(0), ]
+        return dict(zip(rem.id, rem.new_id.astype('Int64')))
+
+
+    gen_rem_dict = rem_id_dict(gen_rem)
+    imp_rem_dict = rem_id_dict(imp_rem)
+
+    fam['new_id'] = fam.fid.map(gen_rem_dict).astype('Int64')
+    fam['fid'] = np.where(fam['new_id'].isna(), fam['fid'], fam['new_id'])
+    fam['iid'] = fam['fid']
+
+    sample['new_id'] = sample.ID_1.map(imp_rem_dict).astype('Int64')
+    sample['ID_1'] = np.where(sample['new_id'].isna(), sample['ID_1'], sample['new_id'])
+    sample['ID_2'] = sample['ID_1']
+
+    f = fam.drop(columns='new_id')
+    f.to_csv(str(rem_dir / f'{project_dir}.fam'), sep=' ', header=False, index=False)
+
+    s = sample.drop(columns='new_id')
+    s.columns = pd.MultiIndex.from_tuples(zip(sample_names, ['0', '0', '0', 'D']))
+    s.to_csv(str(rem_dir / f'{project_dir}.sample'), sep=' ', header=True, index=False)
+
+    # click.echo(f.head())
+    # click.echo('fam works!')
+    # click.echo(s.head())
+    # click.echo('sample works!')
+
+    # with open(f'{prj_dir}/{out_dir}/wremove_{d2}.log', 'w') as f:
+    #     f.write(f'exclude.py log {d1}' + '\n\n')
+    #     f.write('project id: ' + log_info['project_id'] + '\n')
+    #     f.write('-----------------\n')
 
 
 @cli.command()

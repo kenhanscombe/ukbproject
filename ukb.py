@@ -6,6 +6,7 @@ import sys
 import sqlite3
 import modin.pandas as pd
 import numpy as np
+import subprocess
 
 from withdraw import withdraw_index
 from recdtype import record_col_types
@@ -351,22 +352,45 @@ def remove(ctx, project_dir):
 @click.option('-r', '--record', multiple=True,
               help='Name of the record – x will match x*')
 @click.pass_context
+def recdisk(ctx, project_dir, record):
+    """Converts UKB record-level data to R disk.frame."""
+    pkg_dir = ctx.obj['pkg_dir']
+    prj_dir = pkg_dir.parent / project_dir
+    raw_dir = prj_dir / 'raw'
+    rec_dir = prj_dir / 'records'
+    
+    rec_files = []
+
+    # for rec in record:
+    #     rec_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
+
+    os.system(f'''
+    module load apps/R/3.6.0
+    Rscript --vanilla {pkg_dir}/recdisk.R -r {pkg_dir}
+    ''')
+
+
+@cli.command()
+@click.option('-p', '--project-dir', help='Name of project directory')
+@click.option('-r', '--record', multiple=True,
+              help='Name of the record – x will match x*')
+@click.pass_context
 def recdb(ctx, project_dir, record):
-    """Adds UKB record-level data to sqlite DB."""
+    """Converts UKB record-level data to sqlite DB."""
     pkg_dir = ctx.obj['pkg_dir']
     project_dir = pkg_dir.parent / project_dir
     raw_dir = project_dir / 'raw'
-    record_dir = project_dir / 'records'
+    rec_dir = project_dir / 'records'
     record_files = []
 
     for rec in record:
         record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
         
-    con_rec = sqlite3.connect(record_dir / 'records.db')
+    con_rec = sqlite3.connect(rec_dir / 'records.db')
 
     includes_covid = any(['covid' in f for f in record_files])
     if includes_covid:
-        con_cov = sqlite3.connect(record_dir / 'covid.db')
+        con_cov = sqlite3.connect(rec_dir / 'covid.db')
     
     for f in record_files:
         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)

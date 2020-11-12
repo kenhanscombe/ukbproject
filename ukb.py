@@ -4,7 +4,8 @@ import re
 import glob
 import sys
 import sqlite3
-import modin.pandas as pd
+# import modin.pandas as pd
+import pandas as pd
 import numpy as np
 import subprocess
 
@@ -35,10 +36,16 @@ def cli(ctx):
 
 
 @cli.command()
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.pass_context
-def util(ctx):
+def util(ctx, parent_dir):
     """Downloads UKB file handlers and utilities."""
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+
     (ukb_dir / 'bin').mkdir(exist_ok=True)
     (ukb_dir / 'resources').mkdir(exist_ok=True)
 
@@ -58,15 +65,21 @@ def util(ctx):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.argument('users', nargs=-1)
 @click.pass_context
-def clean(ctx, project_dir, users):
+def clean(ctx, project_dir, users, parent_dir):
     """
     Deletes defunct file/dir(s) from projects, and sets permissions.
 
     USERS A whitespace separated list of uids to grant rwx permission.
     """
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
     prj_dir = ukb_dir / project_dir
 
     for x in ['src', 'R', 'resources', 'returns',
@@ -86,14 +99,20 @@ def clean(ctx, project_dir, users):
 
 @cli.command()
 @click.option('-p', '--project-id', help='Project ID, e.g., 12345.')
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.argument('users', nargs=-1)
 @click.pass_context
-def create(ctx, project_id, users):
+def create(ctx, project_id, users, parent_dir):
     """Creates a skeleton UKB project directory.
 
     USERS A whitespace separated list of uids to grant rwx permission.    
     """
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
     gen_target = ctx.obj['genotyped']
     imp_target = ctx.obj['imputed']
     project_dir = f'ukb{project_id}'
@@ -140,28 +159,35 @@ def create(ctx, project_id, users):
 @click.option('-f', '--fam', default=None, help='Name of the fam file.')
 @click.option('-s', '--sample', default=None, help='Name of the sample file.')
 @click.option('-r', '--rel', default=None, help='Name of the relatedness file.')
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.pass_context
-def link(ctx, project_dir, fam, sample, rel):
+def link(ctx, project_dir, fam, sample, rel, parent_dir):
     """Makes links to sample information and relatedness files."""
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
+    prj_dir = ukb_dir / project_dir
     raw_dir = ukb_dir / project_dir / 'raw'
 
     if fam:
         try:
-            os.system(f'ln -s {raw_dir}/{fam} genotyped/')
+            os.system(f'ln -s {raw_dir}/{fam} {prj_dir}/genotyped/')
         except FileExistsError:
             print("The named .fam file does not exist in the project subdirectory raw/.")
 
     if sample:
         try:
-            os.system(f'ln -s {raw_dir}/{sample} imputed/')
+            os.system(f'ln -s {raw_dir}/{sample} {prj_dir}/imputed/')
         except FileExistsError:
             print(
                 "The named .sample file does not exist in the project subdirectory raw/.")
 
     if rel:
         try:
-            os.system(f'ln -s {raw_dir}/{rel} imputed/')
+            os.system(f'ln -s {raw_dir}/{rel} {prj_dir}/imputed/')
         except FileExistsError:
             print(
                 "The named relatedness file does not exist in the project subdirectory raw/.")
@@ -169,15 +195,23 @@ def link(ctx, project_dir, fam, sample, rel):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
-@click.option('-n', '--dry-run', is_flag=True, default=False, help="Use option -n for a dry run.")
+@click.option('-n', '--dry-run', is_flag=True, default=False,
+              help="Use option -n for a dry run.")
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.pass_context
-def munge(ctx, project_dir, dry_run):
+def munge(ctx, project_dir, dry_run, parent_dir):
     """Runs rules described in the Snakefile to munge UKB data."""
-
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
     pkg_dir = ctx.obj['pkg_dir']
     snake_file = pkg_dir / 'Snakefile'
-    project_dir = pkg_dir.parent / project_dir
-    log_dir = project_dir / 'log'
+    # prj_dir = pkg_dir.parent / project_dir
+    prj_dir = ukb_dir / project_dir
+    log_dir = prj / 'log'
 
     snakemake_call = f'snakemake \
                       --profile slurm \
@@ -186,7 +220,7 @@ def munge(ctx, project_dir, dry_run):
                       --jobs 100 \
                       --rerun-incomplete \
                       --config \
-                        project_dir={project_dir} \
+                        project_dir={prj_dir} \
                         pkg_dir={pkg_dir}'
 
     if dry_run:
@@ -196,15 +230,14 @@ def munge(ctx, project_dir, dry_run):
 
 
 @cli.command()
-# @click.option('--yes', is_flag=True, callback=abort_if_false,
-#               expose_value=False,
-#               prompt='Have you downloaded the latest fam and sample file?')
 @click.option('-p', '--project-dir', help='Name of project directory')
 @click.option('-o', '--out-dir', default='withdrawals',
               help='''Name of the directory to write withdrawal exclusions and
               log (default is "withdrawals")''')
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.pass_context
-def withdraw(ctx, project_dir, out_dir):
+def withdraw(ctx, project_dir, out_dir, parent_dir):
     """
     Writes withdrawal IDs and corresponding indeces to be excluded.
     
@@ -213,7 +246,11 @@ def withdraw(ctx, project_dir, out_dir):
     files (.fam and .sample), and negative IDs in the fam and sample files. A
     log of withdrawal and sample information counts is written.
     """
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
     prj_dir = ukb_dir / project_dir
 
     f_exclude, s_exclude, log_info = withdraw_index(prj_dir)
@@ -270,28 +307,37 @@ def withdraw(ctx, project_dir, out_dir):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
-# @click.option('--yes', is_flag=True, callback=abort_if_false,
-#               expose_value=False,
-#               prompt='Have you created a list of withdrawals with ukb-withdraw?')
+@click.option('--parent-dir', default=None,
+              help='Absolute path to project parent directory')
 @click.pass_context
-def remove(ctx, project_dir):
+def remove(ctx, project_dir, parent_dir):
     '''Removes withdrawals from latest sample information.
     
-    Downloads the latest fam and sample files, replaces withdrawal
-    IDs with negative integer sequence, adds symlinks to updated sample
-    fam and sample files to genotyped and imputed respectively.
+    Replaces withdrawal IDs in the fam and sample files with a negative
+    integer sequence, and writes these to project subdirectories
+    genotyped and imputed respectively with the prefix `w`.
     '''
-    ukb_dir = ctx.obj['ukbiobank']
+    if parent_dir is None:
+        ukb_dir = ctx.obj['ukbiobank']
+    else:
+        ukb_dir = Path(parent_dir).absolute()
+    
     prj_dir = ukb_dir / project_dir
     rem_dir = prj_dir / 'withdrawals'
+    gen_dir = prj_dir / 'genotyped'
+    imp_dir = prj_dir / 'imputed'
+    fam_prefix = re.sub('_.*$', '', project_dir) + '_cal'
+    sample_prefix = re.sub('_.*$', '', project_dir) + '_imp'
 
-    fam_file = max(glob.glob(str(prj_dir / 'raw/*fam')), key=os.path.getctime)
+    fam_file = max(glob.glob(
+        str(prj_dir / f'raw/{fam_prefix}*fam')), key=os.path.getctime)
     fam_names = ['fid', 'iid', 'pid', 'mid', 'sex', 'phe']
     fam_dtypes = dict(zip(fam_names, (['Int64'] * (len(fam_names) - 1)) + ['string']))
     fam = pd.read_table(fam_file, header=None, sep=' ', names=fam_names,
                         dtype=fam_dtypes)
 
-    sample_file = max(glob.glob(str(prj_dir / 'raw/*sample')), key=os.path.getctime)
+    sample_file = max(glob.glob(
+        str(prj_dir / f'raw/{sample_prefix}*sample')), key=os.path.getctime)
     sample_names = ['ID_1', 'ID_2', 'missing', 'sex']
     sample_dtypes = dict(zip(sample_names, (['Int64'] * len(sample_names))))
     sample = pd.read_table(sample_file, sep=' ', skiprows=[1], dtype=sample_dtypes)
@@ -324,27 +370,21 @@ def remove(ctx, project_dir):
     fam['new_id'] = fam.fid.map(gen_rem_dict).astype('Int64')
     fam['fid'] = np.where(fam['new_id'].isna(), fam['fid'], fam['new_id'])
     fam['iid'] = fam['fid']
+    fam['sex'] = np.where(fam['fid'].gt(0), fam['sex'], 0)
 
     sample['new_id'] = sample.ID_1.map(imp_rem_dict).astype('Int64')
     sample['ID_1'] = np.where(sample['new_id'].isna(), sample['ID_1'], sample['new_id'])
     sample['ID_2'] = sample['ID_1']
+    sample['sex'] = np.where(sample['ID_1'].gt(0), sample['sex'], 0)
 
+    fam_file_name = Path(fam_file).name
     f = fam.drop(columns='new_id')
-    f.to_csv(str(rem_dir / f'{project_dir}.fam'), sep=' ', header=False, index=False)
+    f.to_csv(str(gen_dir / f'w{fam_file_name}'), sep=' ', header=False, index=False)
 
+    sample_file_name = Path(sample_file).name
     s = sample.drop(columns='new_id')
     s.columns = pd.MultiIndex.from_tuples(zip(sample_names, ['0', '0', '0', 'D']))
-    s.to_csv(str(rem_dir / f'{project_dir}.sample'), sep=' ', header=True, index=False)
-
-    # click.echo(f.head())
-    # click.echo('fam works!')
-    # click.echo(s.head())
-    # click.echo('sample works!')
-
-    # with open(f'{prj_dir}/{out_dir}/wremove_{d2}.log', 'w') as f:
-    #     f.write(f'exclude.py log {d1}' + '\n\n')
-    #     f.write('project id: ' + log_info['project_id'] + '\n')
-    #     f.write('-----------------\n')
+    s.to_csv(str(imp_dir / f'w{sample_file_name}'), sep=' ', header=True, index=False)
 
 
 @cli.command()

@@ -106,7 +106,9 @@ def clean(ctx, project_dir, users, parent_dir):
 def create(ctx, project_id, users, parent_dir):
     """Creates a skeleton UKB project directory.
 
-    USERS A whitespace separated list of uids to grant rwx permission.    
+    Positional arguments:
+
+    USERS A whitespace separated list of uids to grant rwx permission.
     """
     if parent_dir is None:
         ukb_dir = ctx.obj['ukbiobank']
@@ -389,25 +391,24 @@ def remove(ctx, project_dir, parent_dir):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
-@click.option('-r', '--record', multiple=True,
-              help='Name of the record – x will match x*')
+# @click.option('-r', '--record', multiple=True, help='Name of record(s)')
+@click.argument('record', nargs=-1)
 @click.pass_context
 def recdisk(ctx, project_dir, record):
-    """Converts UKB record-level data to R disk.frame."""
+    """Converts UKB record-level data to R disk.frame.
+    
+    Positional arguments:
+
+    RECORD whitespace separated list of record-level data file names
+    """
     pkg_dir = ctx.obj['pkg_dir']
     prj_dir = pkg_dir.parent / project_dir
-    raw_dir = prj_dir / 'raw'
-    rec_dir = prj_dir / 'records'
-    
-    rec_files = []
-
-    # for rec in record:
-    #     rec_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
+    rec_files_pos_arg = ' '.join(record)
 
     os.system(f'''
-    module load apps/R/3.6.0
-    Rscript --vanilla {pkg_dir}/recdisk.R -r {pkg_dir}
-    ''')
+        module load apps/R/3.6.0
+        Rscript --vanilla {pkg_dir}/recdisk.R -p {prj_dir} {rec_files_pos_arg}
+        ''')
 
 
 @cli.command()

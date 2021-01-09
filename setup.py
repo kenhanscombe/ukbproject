@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='ukbproject',
     version='0.1',
-    py_modules=['ukb'],
+    py_modules=['prj'],
     install_requires=[
         'Click',
         'pandas',
@@ -12,6 +12,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        ukb=ukb:cli
+        prj=prj:cli
     ''',
 )

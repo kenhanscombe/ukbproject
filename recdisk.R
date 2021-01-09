@@ -8,19 +8,29 @@ suppressPackageStartupMessages(suppressWarnings(library(tidyverse)))
 suppressPackageStartupMessages(suppressWarnings(library(disk.frame)))
 suppressPackageStartupMessages(suppressWarnings(library(optparse)))
 
-# args <- commandArgs(trailingOnly = TRUE)
-# prj_dir <- args[1]
+# Set up disk.frame with multiple workers and allow unlimited amount of
+# data to be passed from worker to worker
+setup_disk.frame()
+options(future.globals.maxSize = Inf)
 
 option_list = list(
-    make_option(c("-p", "--prj-dir"), action = "store", default = NA,
-                type = "character",
-                help = "Path to the project directory."),
-    make_option(c("-r", "--raw-dir"), action = "store", default = NA,
-                type = "character",
-                help = "Path to the project raw directory.")
+    make_option(c("-p", "--prj-dir"), action = "store", type = "character",
+                default = NA, help = "Path to the project directory.")
 )
 
-opt <- parse_args(OptionParser(option_list = option_list))
+opt <- parse_args(OptionParser(option_list = option_list),
+                  positional_arguments = TRUE,
+                  convert_hyphens_to_underscores = TRUE)
 
-# records <- list.files(opt$raw_dir)
-print(file.path(opt$raw_dir))
+# Note. opt is a list of 2: opt$options, a list of named options; and
+# opt$args, a character vector of positional arguments (the individual
+# records). See print(str(opt))
+
+raw_dir <- file.path(opt$options$prj_dir, "raw")
+rec_dir <- file.path(opt$options$prj_dir, "records")
+rec_paths <- map_chr(opt$args, ~file.path(raw_dir, .))
+diskf_paths <- str_replace(rec_paths, "txt", "df") %>%
+    str_replace("raw", "records")
+
+pwalk(list(infile = rec_paths, outdir = diskf_paths),
+      csv_to_disk.frame, backend = "data.table")

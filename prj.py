@@ -7,7 +7,6 @@ import sqlite3
 # import modin.pandas as pd
 import pandas as pd
 import numpy as np
-import subprocess
 
 from withdraw import withdraw_index
 from recdtype import record_col_types
@@ -24,9 +23,9 @@ def cli(ctx):
     parent directory, at resources/ and bin/ respectively.
     """
     module_p = Path(__file__)
-    pkg_dir = module_p.absolute().parent    
+    pkg_dir = module_p.absolute().parent
     os.environ['PROJECT'] = str(pkg_dir)
-    
+
     p = Path('/scratch/datasets/ukbiobank')
     ctx.ensure_object(dict)
     ctx.obj['ukbiobank'] = p.absolute()
@@ -79,7 +78,7 @@ def clean(ctx, project_dir, users, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     prj_dir = ukb_dir / project_dir
 
     for x in ['src', 'R', 'resources', 'returns',
@@ -90,7 +89,8 @@ def clean(ctx, project_dir, users, parent_dir):
     if users:
         os.system(f'setfacl -R -b {prj_dir}')
         for u in users:
-            os.system(f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {prj_dir}')
+            os.system(
+                f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {prj_dir}')
 
     # add new subdirectories
     for d in ['withdrawals', 'records']:
@@ -114,22 +114,24 @@ def create(ctx, project_id, users, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     gen_target = ctx.obj['genotyped']
     imp_target = ctx.obj['imputed']
     project_dir = f'ukb{project_id}'
-    
+
     if (ukb_dir / project_dir).exists():
-        click.echo('FileExistError: A project directory with this project ID already exists.')
+        click.echo(
+            'FileExistError: A project directory with this project ID already exists.')
         sys.exit()
 
     (ukb_dir / project_dir).mkdir()
-    
+
     # setfacl
     os.system(f'setfacl -b {ukb_dir}/{project_dir}')
 
     for u in users:
-        os.system(f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {ukb_dir}/{project_dir}')
+        os.system(
+            f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {ukb_dir}/{project_dir}')
 
     # make subdirectories
     for d in ['genotyped', 'imputed', 'raw',
@@ -143,7 +145,7 @@ def create(ctx, project_id, users, parent_dir):
     os.system(f'''
         ln -s {gen_target}/ukb_binary_v2.bed {gen_dir}/ukb_binary_v2.bed
         ln -s {gen_target}/ukb_binary_v2.bim {gen_dir}/ukb_binary_v2.bim
-        
+
         ln -s {imp_target}/ukb_sqc_v2.txt {imp_dir}/ukb_sqc_v2.txt
         ln -s {imp_target}/ukb_sqc_v2_fields.txt {imp_dir}/ukb_sqc_v2_fields.txt
 
@@ -170,7 +172,7 @@ def link(ctx, project_dir, fam, sample, rel, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     prj_dir = ukb_dir / project_dir
     raw_dir = ukb_dir / project_dir / 'raw'
 
@@ -208,12 +210,12 @@ def munge(ctx, project_dir, dry_run, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     pkg_dir = ctx.obj['pkg_dir']
     snake_file = pkg_dir / 'Snakefile'
     # prj_dir = pkg_dir.parent / project_dir
     prj_dir = ukb_dir / project_dir
-    log_dir = prj_dir / 'log'
+    # log_dir = prj_dir / 'log'
 
     snakemake_call = f'snakemake \
                       --profile slurm \
@@ -239,7 +241,7 @@ def munge(ctx, project_dir, dry_run, parent_dir):
 def withdraw(ctx, project_dir, out_dir, parent_dir):
     """
     Writes withdrawal IDs and corresponding indeces to be excluded.
-    
+
     Listed IDs are a combination of project-specific IDs that
     appear in both the (latest) withdrawals file and in the sample information
     files (.fam and .sample), and negative IDs in the fam and sample files. A
@@ -249,13 +251,13 @@ def withdraw(ctx, project_dir, out_dir, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     prj_dir = ukb_dir / project_dir
 
     f_exclude, s_exclude, log_info = withdraw_index(prj_dir)
 
     (prj_dir / out_dir).mkdir(exist_ok=True)
-    
+
     def write_excl(excl, gen, ext, out=out_dir,
                    date=date.today().strftime('%d%m%Y')):
         if (gen == 'genotyped') & (ext == 'id'):
@@ -269,7 +271,6 @@ def withdraw(ctx, project_dir, out_dir, parent_dir):
          .loc[excl['exclude'] == 1, id_col]
          .to_csv(f'{prj_dir}/{out}/wexcl_' + gen + f'_{date}.' + ext,
                  header=False, index=False))
-
 
     d1 = date.today().strftime('%d %B %Y')
     d2 = date.today().strftime('%d%m%Y')
@@ -311,7 +312,7 @@ def withdraw(ctx, project_dir, out_dir, parent_dir):
 @click.pass_context
 def remove(ctx, project_dir, parent_dir):
     '''Removes withdrawals from latest sample information.
-    
+
     Replaces withdrawal IDs in the fam and sample files with a negative
     integer sequence, and writes these to project subdirectories
     genotyped and imputed respectively with the prefix `w`.
@@ -320,7 +321,7 @@ def remove(ctx, project_dir, parent_dir):
         ukb_dir = ctx.obj['ukbiobank']
     else:
         ukb_dir = Path(parent_dir).absolute()
-    
+
     prj_dir = ukb_dir / project_dir
     rem_dir = prj_dir / 'withdrawals'
     gen_dir = prj_dir / 'genotyped'
@@ -331,7 +332,8 @@ def remove(ctx, project_dir, parent_dir):
     fam_file = max(glob.glob(
         str(prj_dir / f'raw/{fam_prefix}*fam')), key=os.path.getctime)
     fam_names = ['fid', 'iid', 'pid', 'mid', 'sex', 'phe']
-    fam_dtypes = dict(zip(fam_names, (['Int64'] * (len(fam_names) - 1)) + ['string']))
+    fam_dtypes = dict(
+        zip(fam_names, (['Int64'] * (len(fam_names) - 1)) + ['string']))
     fam = pd.read_table(fam_file, header=None, sep=' ', names=fam_names,
                         dtype=fam_dtypes)
 
@@ -339,19 +341,21 @@ def remove(ctx, project_dir, parent_dir):
         str(prj_dir / f'raw/{sample_prefix}*sample')), key=os.path.getctime)
     sample_names = ['ID_1', 'ID_2', 'missing', 'sex']
     sample_dtypes = dict(zip(sample_names, (['Int64'] * len(sample_names))))
-    sample = pd.read_table(sample_file, sep=' ', skiprows=[1], dtype=sample_dtypes)
-    
-    gen_rem_file = max(glob.glob(str(rem_dir / '*genotyped*id')), key=os.path.getctime)
+    sample = pd.read_table(sample_file, sep=' ', skiprows=[
+                           1], dtype=sample_dtypes)
+
+    gen_rem_file = max(
+        glob.glob(str(rem_dir / '*genotyped*id')), key=os.path.getctime)
     gen_rem = pd.read_table(gen_rem_file, header=None, names=['id'])
 
-    imp_rem_file = max(glob.glob(str(rem_dir / '*imputed*id')), key=os.path.getctime)
+    imp_rem_file = max(
+        glob.glob(str(rem_dir / '*imputed*id')), key=os.path.getctime)
     imp_rem = pd.read_table(imp_rem_file, header=None, names=['id'])
-    
 
     def rem_id_dict(rem):
         """Returns a dict of replacement negative IDs"""
         id_min = rem.id.min()
-        
+
         for row in range(rem.shape[0]):
             if rem.loc[row, 'id'] > 0:
                 id_min -= 1
@@ -362,7 +366,6 @@ def remove(ctx, project_dir, parent_dir):
         rem = rem.loc[rem.id.gt(0), ]
         return dict(zip(rem.id, rem.new_id.astype('Int64')))
 
-
     gen_rem_dict = rem_id_dict(gen_rem)
     imp_rem_dict = rem_id_dict(imp_rem)
 
@@ -372,18 +375,22 @@ def remove(ctx, project_dir, parent_dir):
     fam['sex'] = np.where(fam['fid'].gt(0), fam['sex'], 0)
 
     sample['new_id'] = sample.ID_1.map(imp_rem_dict).astype('Int64')
-    sample['ID_1'] = np.where(sample['new_id'].isna(), sample['ID_1'], sample['new_id'])
+    sample['ID_1'] = np.where(sample['new_id'].isna(),
+                              sample['ID_1'], sample['new_id'])
     sample['ID_2'] = sample['ID_1']
     sample['sex'] = np.where(sample['ID_1'].gt(0), sample['sex'], 0)
 
     fam_file_name = Path(fam_file).name
     f = fam.drop(columns='new_id')
-    f.to_csv(str(gen_dir / f'w{fam_file_name}'), sep=' ', header=False, index=False)
+    f.to_csv(str(gen_dir / f'w{fam_file_name}'),
+             sep=' ', header=False, index=False)
 
     sample_file_name = Path(sample_file).name
     s = sample.drop(columns='new_id')
-    s.columns = pd.MultiIndex.from_tuples(zip(sample_names, ['0', '0', '0', 'D']))
-    s.to_csv(str(imp_dir / f'w{sample_file_name}'), sep=' ', header=True, index=False)
+    s.columns = pd.MultiIndex.from_tuples(
+        zip(sample_names, ['0', '0', '0', 'D']))
+    s.to_csv(str(imp_dir / f'w{sample_file_name}'),
+             sep=' ', header=True, index=False)
 
 
 @cli.command()
@@ -393,7 +400,7 @@ def remove(ctx, project_dir, parent_dir):
 @click.pass_context
 def recdisk(ctx, project_dir, record):
     """Converts UKB record-level data to R disk.frame.
-    
+
     Positional arguments:
 
     RECORD whitespace separated list of record-level data file names
@@ -423,16 +430,16 @@ def recdb(ctx, project_dir, record):
 
     for rec in record:
         record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
-        
+
     con_rec = sqlite3.connect(rec_dir / 'records.db')
 
     includes_covid = any(['covid' in f for f in record_files])
     if includes_covid:
         con_cov = sqlite3.connect(rec_dir / 'covid.db')
-    
+
     for f in record_files:
         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
-        
+
         print('Reading', table_name + '...')
         if table_name.startswith('gp_'):
             df = pd.read_table(raw_dir / f, header=0, encoding='ISO-8859-1')

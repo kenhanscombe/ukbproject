@@ -213,14 +213,11 @@ def munge(ctx, project_dir, dry_run, parent_dir):
     snake_file = pkg_dir / 'Snakefile'
     # prj_dir = pkg_dir.parent / project_dir
     prj_dir = ukb_dir / project_dir
-    log_dir = prj / 'log'
+    log_dir = prj_dir / 'log'
 
     snakemake_call = f'snakemake \
                       --profile slurm \
                       --snakefile {snake_file} \
-                      --use-envmodules \
-                      --jobs 100 \
-                      --rerun-incomplete \
                       --config \
                         project_dir={prj_dir} \
                         pkg_dir={pkg_dir}'

@@ -1,4 +1,4 @@
-name: ukb-env
+name: ukbproject
 channels:
   - bioconda
   - conda-forge

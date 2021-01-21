@@ -1,7 +1,6 @@
 # ukbproject
 
-[![travis-ci](https://travis-ci.com/kenhanscombe/ukbproject.svg?branch=master)](https://travis-ci.com/github/kenhanscombe/ukbproject)
-[![codecov](https://codecov.io/gh/kenhanscombe/ukbproject/branch/master/graph/badge.svg)](https://codecov.io/gh/kenhanscombe/ukbproject)
+![CI](https://github.com/actions/ukbproject/workflows/CI/badge.svg)
 
 A python CLI to setup a UK Biobank (UKB) project.
 
@@ -51,13 +50,13 @@ Create and load the conda environment
 
 ```{bash}
 conda env create -f environment.yml
-conda activate ukb-env
+conda activate ukbproject
 python3 -m pip install --editable .
 ```
 
 After use (below), exit the environment with `conda deactivate`. To use
-the `ukb` CLI on subsequent occasions, simply activate the environment
-`conda activate ukb-env`.
+the `prj` CLI on subsequent occasions, simply activate the environment
+`conda activate ukbproject`.
 
 <br>
 
@@ -67,11 +66,11 @@ the `ukb` CLI on subsequent occasions, simply activate the environment
 For help
 
 ```{bash}
-ukb --help
+prj --help
 ```
 
 <pre>
-Usage: ukb [OPTIONS] COMMAND [ARGS]...
+Usage: prj [OPTIONS] COMMAND [ARGS]...
 
 Sets up a UKB project on Rosalind storing common data and utilities in the parent directory, at resources/ and bin/ respectively.
 
@@ -92,10 +91,10 @@ Commands:
 
 Note. usage is similar to `git` with general **options**, and
 **commands** that take further **arguments**. For help on commands (e.g.
-`ukb create`)
+`prj create`)
 
 ```{bash}
-ukb create --help
+prj create --help
 ```
 
 <br>
@@ -107,7 +106,7 @@ At /scratch/datasets/ukbiobank, create a project
 directory ukb\<*project_id*\>.
 
 ```{bash}
-ukb create -p <project_id>
+prj create -p <project_id>
 ```
 
 This will create the project directory structure in **Figure 1**,
@@ -184,7 +183,7 @@ cd /scratch/datasets/ukbiobank/ukb_<project_id>/raw/
 Process the encrypted UKB files into formats to be read by ukbkings.
 
 ```{bash}
-ukb munge -p ukb<project_id>
+prj munge -p ukb<project_id>
 ```
 
 The munged phenotype data are written to phenotypes/ and output
@@ -217,7 +216,7 @@ Sample information files (.fam and .sample) and the relatedness file
 files in genotyped/ and imputed/ (**Figure 3**).
 
 ```{bash}
-ukb link \
+prj link \
 -p ukb<project_id> \
 -f <fam_file_name> \
 -s <sample_file_name> \

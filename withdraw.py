@@ -3,35 +3,23 @@ import glob
 import re
 from pathlib import Path
 
-# Each project has (with project-specific ids) :
-# - w*.csv withdrawals file(s)
-# - fam file (which correspond to the bed/bim files)
-# - sample file (which corresponds to bgen/bgen.bgi files)
-# (- phenotype data file)
-
-# TODO: Find exclude/redacted/dropout fam ids in sample ids
-# TODO: Confirm: phenotype (file) can be smaller than fam/sample
-# TODO: Confirm: fam to bed (and sample to bgen) size correspondence
-# TODO: Can I delete from bed/bgen only (can't delete in fam/sample?)
-
 
 def withdraw_index(project_dir):
-    """Writes indeces of samples to keep and remove.
-
-    withdraw (str): Path to the withdrawals file
-    fam (str): Path to the fam file
-    sample (str): Path to the sample file
     """
-    ukb_dir = Path('/scratch/datasets/ukbiobank')
-    prj_dir = ukb_dir / project_dir
+    Writes indeces of samples to keep and remove.
+
+    project_dir (str): Full path of the project directory
+    """
+    prj_dir = Path(project_dir)
 
     withdrawal_files = glob.glob(str(prj_dir / 'raw/w*csv'))
     fam_file = glob.glob(str(prj_dir / 'raw/*fam'))[0]
     sample_file = glob.glob(str(prj_dir / 'raw/*sample'))[0]
 
-    wdfs = (pd.read_csv(w, header=None, names=['id']) for w in withdrawal_files)
+    wdfs = (pd.read_csv(w, header=None, names=[
+            'id']) for w in withdrawal_files)
     wdfs_cat = pd.concat(wdfs)
-    
+
     w = pd.DataFrame({'id': wdfs_cat.id.unique()})
     f = pd.read_csv(fam_file, sep=r'\s+', header=None,
                     names=['fid', 'iid', 'pid', 'mid', 'sex', 'phe'])

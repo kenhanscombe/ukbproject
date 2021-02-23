@@ -8,8 +8,8 @@ import sqlite3
 import pandas as pd
 import numpy as np
 
-from withdraw import withdraw_index
-from recdtype import record_col_types
+from ukbproject.withdraw import withdraw_index
+from ukbproject.recdtype import record_col_types
 from datetime import date
 from pathlib import Path
 

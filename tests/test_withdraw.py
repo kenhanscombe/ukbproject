@@ -1,8 +1,8 @@
 import pytest
-import withdraw
 import pandas as pd
 import numpy as np
 
+from ukbproject import withdraw
 from random import sample, choices
 
 

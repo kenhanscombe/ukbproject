@@ -1,17 +1,20 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='ukbproject',
     version='0.1',
-    py_modules=['prj'],
+    packages=find_packages(),
+    include_package_data=True,
+    # py_modules=['prj'],
+    entry_points='''
+        [console_scripts]
+        prj=ukbproject.prj:cli
+    ''',
     install_requires=[
         'Click',
+        'snakemake>=5.10',
         'pandas',
         'numpy',
         'bs4'
-    ],
-    entry_points='''
-        [console_scripts]
-        prj=prj:cli
-    ''',
+    ]
 )

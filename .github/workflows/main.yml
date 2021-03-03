@@ -13,22 +13,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          persist-credentials: false
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: ukbproject
-          environment-file: conf/environment.yml
-          auto-activate-base: false
+      # - uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     auto-update-conda: true
+      #     python-version: ${{ matrix.python-version }}
+      #     activate-environment: ukbproject
+      #     environment-file: conf/environment.yml
+      #     auto-activate-base: false
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Setup conda
+        uses: s-weigand/setup-conda@v1
+        with:
+            activate-conda: true
+      - run: conda env update -n base -f environment.yml
       
       - name: Install dependencies
         run: |
+          pip install -U pip setuptools
           python -m pip install --upgrade pip
           pip install flake8 pytest pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi

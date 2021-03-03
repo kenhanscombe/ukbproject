@@ -12,11 +12,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
+          persist-credentials: false
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: ukbproject

@@ -182,4 +182,3 @@ dependencies:
   - pip:
     - click==7.1.2
     - numpy==1.19.2
-prefix: /users/k1342162/apps/miniconda3/envs/ukb-env

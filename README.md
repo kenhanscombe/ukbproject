@@ -1,6 +1,6 @@
 # ukbproject
 
-![build](https://github.com/kenhanscombe/ukbproject/workflows/main/badge.svg)
+[![build](https://github.com/kenhanscombe/ukbproject/workflows/main/badge.svg)](https://github.com/kenhanscombe/ukbproject/actions)
 
 A python CLI to setup a UK Biobank (UKB) project.
 

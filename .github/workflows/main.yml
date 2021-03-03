@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       - uses: conda-incubator/setup-miniconda@v2
         with:

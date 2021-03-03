@@ -1,6 +1,15 @@
 .vscode
 .snakemake
+
+# Byte-compiled / optimized / DLL files
+ukbproject/__pycache__/
+
+# Unit test / coverage reports
+.pytest_cache/
+
+# Distribution / packaging
+*.egg-info/
+*.egg
+
 rosalind-env
-__pycache__
-*.egg-info
 fields.ukb

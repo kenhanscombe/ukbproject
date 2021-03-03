@@ -1,6 +1,0 @@
-{
-    "__default__": {
-        "job-name": "munge",
-        "mem": "10G"
-    }
-}

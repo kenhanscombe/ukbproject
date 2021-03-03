@@ -1,17 +1,20 @@
 import click
+import subprocess
 import os
 import re
 import glob
 import sys
-import sqlite3
-# import modin.pandas as pd
 import pandas as pd
 import numpy as np
+# import tempfile
 
 from ukbproject.withdraw import withdraw_index
-from ukbproject.recdtype import record_col_types
 from datetime import date
 from pathlib import Path
+
+# import sqlite3
+# import modin.pandas as pd
+# from ukbproject.recdtype import record_col_types
 
 
 @click.group()
@@ -134,8 +137,8 @@ def create(ctx, project_id, users, parent_dir):
             f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {ukb_dir}/{project_dir}')
 
     # make subdirectories
-    for d in ['genotyped', 'imputed', 'raw',
-              'log', 'phenotypes', 'withdrawals']:
+    for d in ['genotyped', 'imputed', 'raw', 'logs', 'config',
+              'phenotypes', 'withdrawals']:
         (ukb_dir / project_dir / d).mkdir()
 
     # symlink genetic data
@@ -212,22 +215,26 @@ def munge(ctx, project_dir, dry_run, parent_dir):
         ukb_dir = Path(parent_dir).absolute()
 
     pkg_dir = ctx.obj['pkg_dir']
-    snake_file = pkg_dir / 'Snakefile'
-    # prj_dir = pkg_dir.parent / project_dir
     prj_dir = ukb_dir / project_dir
-    # log_dir = prj_dir / 'log'
+    snake_file = pkg_dir / 'Snakefile'
+    config_file = prj_dir / 'config/config.yml'
 
-    snakemake_call = f'snakemake \
-                      --profile slurm \
-                      --snakefile {snake_file} \
-                      --config \
-                        project_dir={prj_dir} \
-                        pkg_dir={pkg_dir}'
+    with open(config_file, 'wt') as conf:
+        conf.write(
+            f'''
+project_dir: {prj_dir}
+pkg_dir: {pkg_dir}
+output: {prj_dir}/logs/{{rule}}.{{wildcards.id}}.slurm.%j.out
+error: {prj_dir}/logs/{{rule}}.{{wildcards.id}}.slurm.%j.err
+''')
+
+    cmd = f'snakemake --profile slurm --snakefile {snake_file} --configfile {config_file}'
+    cmd = cmd.split()
 
     if dry_run:
-        os.system(snakemake_call + ' -n')
-    else:
-        os.system(snakemake_call)
+        cmd += ['-n']
+
+    subprocess.run(cmd)
 
 
 @cli.command()
@@ -395,7 +402,6 @@ def remove(ctx, project_dir, parent_dir):
 
 @cli.command()
 @click.option('-p', '--project-dir', help='Name of project directory')
-# @click.option('-r', '--record', multiple=True, help='Name of record(s)')
 @click.argument('record', nargs=-1)
 @click.pass_context
 def recdisk(ctx, project_dir, record):
@@ -415,47 +421,47 @@ def recdisk(ctx, project_dir, record):
         ''')
 
 
-@cli.command()
-@click.option('-p', '--project-dir', help='Name of project directory')
-@click.option('-r', '--record', multiple=True,
-              help='Name of the record – x will match x*')
-@click.pass_context
-def recdb(ctx, project_dir, record):
-    """Converts UKB record-level data to sqlite DB."""
-    pkg_dir = ctx.obj['pkg_dir']
-    project_dir = pkg_dir.parent / project_dir
-    raw_dir = project_dir / 'raw'
-    rec_dir = project_dir / 'records'
-    record_files = []
+# @cli.command()
+# @click.option('-p', '--project-dir', help='Name of project directory')
+# @click.option('-r', '--record', multiple=True,
+#               help='Name of the record – x will match x*')
+# @click.pass_context
+# def recdb(ctx, project_dir, record):
+#     """Converts UKB record-level data to sqlite DB."""
+#     pkg_dir = ctx.obj['pkg_dir']
+#     project_dir = pkg_dir.parent / project_dir
+#     raw_dir = project_dir / 'raw'
+#     rec_dir = project_dir / 'records'
+#     record_files = []
 
-    for rec in record:
-        record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
+#     for rec in record:
+#         record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
 
-    con_rec = sqlite3.connect(rec_dir / 'records.db')
+#     con_rec = sqlite3.connect(rec_dir / 'records.db')
 
-    includes_covid = any(['covid' in f for f in record_files])
-    if includes_covid:
-        con_cov = sqlite3.connect(rec_dir / 'covid.db')
+#     includes_covid = any(['covid' in f for f in record_files])
+#     if includes_covid:
+#         con_cov = sqlite3.connect(rec_dir / 'covid.db')
 
-    for f in record_files:
-        table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
+#     for f in record_files:
+#         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
 
-        print('Reading', table_name + '...')
-        if table_name.startswith('gp_'):
-            df = pd.read_table(raw_dir / f, header=0, encoding='ISO-8859-1')
-        else:
-            df = pd.read_table(raw_dir / f, header=0)
+#         print('Reading', table_name + '...')
+#         if table_name.startswith('gp_'):
+#             df = pd.read_table(raw_dir / f, header=0, encoding='ISO-8859-1')
+#         else:
+#             df = pd.read_table(raw_dir / f, header=0)
 
-        print('Writing', table_name + ' to SQL db...')
-        if table_name.startswith('covid'):
-            df._to_pandas().to_sql(table_name, con_cov, if_exists='replace',
-                                   index=False, chunksize=50_000,
-                                   dtype=record_col_types[table_name])
-        else:
-            df._to_pandas().to_sql(table_name, con_rec, if_exists='replace',
-                                   index=False, chunksize=50_000,
-                                   dtype=record_col_types[table_name])
+#         print('Writing', table_name + ' to SQL db...')
+#         if table_name.startswith('covid'):
+#             df._to_pandas().to_sql(table_name, con_cov, if_exists='replace',
+#                                    index=False, chunksize=50_000,
+#                                    dtype=record_col_types[table_name])
+#         else:
+#             df._to_pandas().to_sql(table_name, con_rec, if_exists='replace',
+#                                    index=False, chunksize=50_000,
+#                                    dtype=record_col_types[table_name])
 
-    con_rec.close()
-    if includes_covid:
-        con_cov.close()
+#     con_rec.close()
+#     if includes_covid:
+#         con_cov.close()

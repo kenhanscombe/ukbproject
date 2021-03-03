@@ -12,7 +12,7 @@ setup(
     ''',
     install_requires=[
         'Click',
-        'snakemake>=5.10',
+        'snakemake>=5.31',
         'pandas',
         'numpy',
         'bs4'

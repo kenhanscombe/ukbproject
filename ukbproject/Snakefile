@@ -5,6 +5,7 @@ import pandas as pd
 
 from pathlib import Path
 
+# --config-file passed to snakemake on command line
 
 project_dir = config['project_dir']
 pkg_dir = config['pkg_dir']
@@ -31,9 +32,11 @@ rule ukbunpack_decrypt:
         key = f'{project_dir}/raw/ukb{{id}}.key'
     output:
         f'{project_dir}/raw/ukb{{id}}.enc_ukb'
+    log: f'{project_dir}/logs/ukbunpack_decrypt_{{id}}.log'
+    resources: mem=12000, time=30
     shell:
         '''
-        {ukbunpack} {input.enc} {input.key}
+        {ukbunpack} {input.enc} {input.key} &> {log}
         '''
 
 
@@ -43,6 +46,8 @@ rule ukbconv_convert:
     output:
         csv = f'{project_dir}/phenotypes/ukb{{id}}.csv',
         html = f'{project_dir}/phenotypes/ukb{{id}}.html'
+    # log: f'{project_dir}/logs/ukbconv_convert_{{id}}.log'
+    resources: mem=12000, time=60*8
     params:
         out = f'{project_dir}/phenotypes/ukb{{id}}',
         enc = f'{resources}/encoding.ukb'
@@ -58,6 +63,8 @@ rule munge_ukb_html:
         html = f'{project_dir}/phenotypes/ukb{{id}}.html'
     output:
         finder = f'{project_dir}/phenotypes/ukb{{id}}_field_finder.txt'
+    log: f'{project_dir}/logs/munge_ukb_html_{{id}}.log'
+    resources: mem=12000, time=60*4
     params:
         basket = 'ukb{id}',
         out_dir = f'{project_dir}/phenotypes/'
@@ -68,5 +75,6 @@ rule munge_ukb_html:
         {pkg_dir}/munge.py \
             --html {{input.html}} \
             --basket {{params.basket}} \
-            --out-dir {{params.out_dir}}
+            --out-dir {{params.out_dir}} \
+            &> {{log}}
         '''

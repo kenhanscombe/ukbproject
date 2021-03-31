@@ -204,10 +204,12 @@ def link(ctx, project_dir, fam, sample, rel, parent_dir):
 @click.option('-p', '--project-dir', help='Name of project directory')
 @click.option('-n', '--dry-run', is_flag=True, default=False,
               help="Use option -n for a dry run.")
+@click.option('-u', '--unlock', is_flag=True, default=False,
+              help="Use option -u to unlock the directory.")
 @click.option('--parent-dir', default=None,
               help='Absolute path to project parent directory')
 @click.pass_context
-def munge(ctx, project_dir, dry_run, parent_dir):
+def munge(ctx, project_dir, dry_run, unlock, parent_dir):
     """Runs rules described in the Snakefile to munge UKB data."""
     if parent_dir is None:
         ukb_dir = ctx.obj['ukbiobank']
@@ -233,6 +235,9 @@ error: {prj_dir}/logs/{{rule}}.{{wildcards.id}}.slurm.%j.err
 
     if dry_run:
         cmd += ['-n']
+
+    if unlock:
+        cmd += ['--unlock']
 
     subprocess.run(cmd)
 

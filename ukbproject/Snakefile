@@ -46,15 +46,15 @@ rule ukbconv_convert:
     output:
         csv = f'{project_dir}/phenotypes/ukb{{id}}.csv',
         html = f'{project_dir}/phenotypes/ukb{{id}}.html'
-    # log: f'{project_dir}/logs/ukbconv_convert_{{id}}.log'
-    resources: mem=12000, time=60*8
+    log: f'{project_dir}/logs/ukbconv_convert_{{id}}.log'
+    resources: mem=12000, time=60*48
     params:
         out = f'{project_dir}/phenotypes/ukb{{id}}',
         enc = f'{resources}/encoding.ukb'
     shell:
         '''
-        {ukbconv} {input} csv -o{params.out} -e{params.enc}
-        {ukbconv} {input} docs -o{params.out} -e{params.enc}
+        {ukbconv} {input} csv -o{params.out} -e{params.enc} &> {log}
+        {ukbconv} {input} docs -o{params.out} -e{params.enc} >> {log} 2>&1
         '''
 
 

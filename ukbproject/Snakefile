@@ -16,7 +16,7 @@ bin_dir = Path(project_dir).parent / 'bin'
 ukbunpack = f'{bin_dir}/ukbunpack'
 ukbconv = f'{bin_dir}/ukbconv'
 
-dataset_ids = [re.sub(r'^.*ukb|\.enc', '', d) for d in glob.glob(f'{project_dir}/raw/*.enc')]
+dataset_ids = [re.sub(r'^.*ukb|\.enc', '', d) for d in glob.glob(f'{project_dir}/raw/ukb*.enc')]
 
 rule all:
     input:

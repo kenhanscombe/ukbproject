@@ -52,7 +52,8 @@ def util(ctx, parent_dir):
     (ukb_dir / 'resources').mkdir(exist_ok=True)
 
     os.system(f'''
-        wget -O {ukb_dir}/resources/Codings_Showcase.csv http://biobank.ctsu.ox.ac.uk/~bbdatan/Codings_Showcase.csv
+        # wget -O {ukb_dir}/resources/Codings_Showcase.csv http://biobank.ctsu.ox.ac.uk/~bbdatan/Codings_Showcase.csv
+        wget -O {ukb_dir}/resources/Codings.csv https://biobank.ctsu.ox.ac.uk/~bbdatan/Codings.csv
         wget -nd -O {ukb_dir}/resources/encoding.ukb biobank.ctsu.ox.ac.uk/crystal/util/encoding.ukb
 
         wget -nd -O {ukb_dir}/bin/ukbmd5 biobank.ndph.ox.ac.uk/showcase/util/ukbmd5

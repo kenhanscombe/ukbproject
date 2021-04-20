@@ -220,9 +220,12 @@ def munge(ctx, project_dir, dry_run, unlock, parent_dir):
     pkg_dir = ctx.obj['pkg_dir']
     prj_dir = ukb_dir / project_dir
     snake_file = pkg_dir / 'Snakefile'
-    config_file = prj_dir / 'config/config.yml'
+    cfg_dir = prj_dir / 'config'
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+    config_file = cfg_dir / "config.yml"
+    config_file.touch(exist_ok=True)
 
-    with open(config_file, 'wt') as conf:
+    with open(config_file, 'w') as conf:
         conf.write(
             f'''
 project_dir: {prj_dir}

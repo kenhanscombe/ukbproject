@@ -170,9 +170,9 @@ file (*rel*.dat/.txt) into raw/.
 ```{bash}
 cd /scratch/datasets/ukbiobank/ukb_<project_id>/raw/
 
-/scratch/datasets/ukbiobank/bin/ukbgene cal -c1 -m -aukb<project_id>.key
-/scratch/datasets/ukbiobank/bin/ukbgene imp -c1 -m -aukb<project_id>.key
-/scratch/datasets/ukbiobank/bin/ukbgene rel -aukb<project_id>.key
+/scratch/datasets/ukbiobank/bin/gfetch 22418 -c1 -m -a<key_name>.key
+/scratch/datasets/ukbiobank/bin/gfetch 22828 -c1 -m -a<key_name>.key
+/scratch/datasets/ukbiobank/bin/gfetch rel -a<key_name>.key
 ```
 
 <br>

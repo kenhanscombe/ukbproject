@@ -27,6 +27,9 @@ rule all:
 
 
 rule ukbunpack_decrypt:
+    """
+    Decrypt UKB .enc file with associated .key file
+    """
     input:
         enc = f'{project_dir}/raw/ukb{{id}}.enc',
         key = f'{project_dir}/raw/ukb{{id}}.key'
@@ -35,12 +38,15 @@ rule ukbunpack_decrypt:
     log: f'{project_dir}/logs/ukbunpack_decrypt_{{id}}.log'
     resources: mem=12000, time=30
     shell:
-        '''
+        """
         {ukbunpack} {input.enc} {input.key} &> {log}
-        '''
+        """
 
 
 rule ukbconv_convert:
+    """
+    Convert decrypted UKB file .enc_ukb to .csv and .html
+    """
     input:
         f'{project_dir}/raw/ukb{{id}}.enc_ukb'
     output:
@@ -52,13 +58,17 @@ rule ukbconv_convert:
         out = f'{project_dir}/phenotypes/ukb{{id}}',
         enc = f'{resources}/encoding.ukb'
     shell:
-        '''
+        """
         {ukbconv} {input} csv -o{params.out} -e{params.enc} &> {log}
         {ukbconv} {input} docs -o{params.out} -e{params.enc} >> {log} 2>&1
-        '''
+        """
 
 
 rule munge_ukb_html:
+    """
+    Make field-to-description lookup table, with variable UKB type,
+    R type, and path to dataset/basket containing particular fields.
+    """
     input:
         html = f'{project_dir}/phenotypes/ukb{{id}}.html'
     output:
@@ -71,10 +81,10 @@ rule munge_ukb_html:
     envmodules:
         "devtools/anaconda/2019.3-python3.7.3"
     shell:
-        f'''
+        f"""
         {pkg_dir}/munge.py \
             --html {{input.html}} \
             --basket {{params.basket}} \
             --out-dir {{params.out_dir}} \
             &> {{log}}
-        '''
+        """

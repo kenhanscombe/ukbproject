@@ -43,24 +43,40 @@ rule ukbunpack_decrypt:
         """
 
 
-rule ukbconv_convert:
+rule ukbconv_csv:
     """
-    Convert decrypted UKB file .enc_ukb to .csv and .html
+    Convert decrypted UKB file .enc_ukb to .csv
     """
-    input:
-        f'{project_dir}/raw/ukb{{id}}.enc_ukb'
-    output:
-        csv = f'{project_dir}/phenotypes/ukb{{id}}.csv',
-        html = f'{project_dir}/phenotypes/ukb{{id}}.html'
-    log: f'{project_dir}/logs/ukbconv_convert_{{id}}.log'
-    resources: mem=12000, time=60*48
+    input: f'{project_dir}/raw/ukb{{id}}.enc_ukb'
+    output: f'{project_dir}/phenotypes/ukb{{id}}.csv'
+    log: f'{project_dir}/logs/ukbconv_csv_{{id}}.log'
+    threads: 4
+    resources: mem=12000, time=60*24, ntasks=4
     params:
         out = f'{project_dir}/phenotypes/ukb{{id}}',
         enc = f'{resources}/encoding.ukb'
     shell:
         """
         {ukbconv} {input} csv -o{params.out} -e{params.enc} &> {log}
-        {ukbconv} {input} docs -o{params.out} -e{params.enc} >> {log} 2>&1
+        """
+
+
+rule ukbconv_html:
+    """
+    Convert decrypted UKB file .enc_ukb to .html
+    (NB. ukbconv docs creates the file fields.ukb)
+    """
+    input: f'{project_dir}/raw/ukb{{id}}.enc_ukb'
+    output: f'{project_dir}/phenotypes/ukb{{id}}.html'
+    log: f'{project_dir}/logs/ukbconv_html_{{id}}.log'
+    threads: 4
+    resources: mem=12000, time=60*24, ntasks=4
+    params:
+        out = f'{project_dir}/phenotypes/ukb{{id}}',
+        enc = f'{resources}/encoding.ukb'
+    shell:
+        """
+        {ukbconv} {input} docs -o{params.out} -e{params.enc} &> {log}
         """
 
 

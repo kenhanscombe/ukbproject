@@ -63,8 +63,9 @@ rule ukbconv_csv:
 
 rule ukbconv_html:
     """
-    Convert decrypted UKB file .enc_ukb to .html
-    (NB. ukbconv docs creates the file fields.ukb)
+    Convert decrypted UKB file .enc_ukb to .html (ukbconv docs creates
+    the file fields.ukb). NB. Workaround for UKB-known "Rosetta Error"
+    change exit status to 0
     """
     input: f'{project_dir}/raw/ukb{{id}}.enc_ukb'
     output: f'{project_dir}/phenotypes/ukb{{id}}.html'
@@ -76,7 +77,17 @@ rule ukbconv_html:
         enc = f'{resources}/encoding.ukb'
     shell:
         """
+        set +e
+        
         {ukbconv} {input} docs -o{params.out} -e{params.enc} &> {log}
+
+        exitcode=$?
+        if [ $exitcode -eq 0 ]
+        then
+        exit 0
+        else
+        exit 0
+        fi
         """
 
 

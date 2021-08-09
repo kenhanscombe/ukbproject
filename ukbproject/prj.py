@@ -297,7 +297,7 @@ def withdraw(ctx, project_dir, out_dir, parent_dir):
 
     # log
     with open(f'{prj_dir}/{out_dir}/wexcl_{d2}.log', 'w') as f:
-        f.write(f'exclude.py log {d1}' + '\n\n')
+        f.write(f'prj withdraw log {d1}' + '\n\n')
         f.write('project id: ' + log_info['project_id'] + '\n')
         f.write('-----------------\n')
 
@@ -428,49 +428,3 @@ def recdisk(ctx, project_dir, record):
         module load apps/R/3.6.0
         Rscript --vanilla {pkg_dir}/recdisk.R -p {prj_dir} {rec_files_pos_arg}
         ''')
-
-
-# @cli.command()
-# @click.option('-p', '--project-dir', help='Name of project directory')
-# @click.option('-r', '--record', multiple=True,
-#               help='Name of the record – x will match x*')
-# @click.pass_context
-# def recdb(ctx, project_dir, record):
-#     """Converts UKB record-level data to sqlite DB."""
-#     pkg_dir = ctx.obj['pkg_dir']
-#     project_dir = pkg_dir.parent / project_dir
-#     raw_dir = project_dir / 'raw'
-#     rec_dir = project_dir / 'records'
-#     record_files = []
-
-#     for rec in record:
-#         record_files.extend(glob.glob(str(raw_dir / f'{rec}*')))
-
-#     con_rec = sqlite3.connect(rec_dir / 'records.db')
-
-#     includes_covid = any(['covid' in f for f in record_files])
-#     if includes_covid:
-#         con_cov = sqlite3.connect(rec_dir / 'covid.db')
-
-#     for f in record_files:
-#         table_name = re.sub(str(raw_dir) + '\/|\.txt', '', f)
-
-#         print('Reading', table_name + '...')
-#         if table_name.startswith('gp_'):
-#             df = pd.read_table(raw_dir / f, header=0, encoding='ISO-8859-1')
-#         else:
-#             df = pd.read_table(raw_dir / f, header=0)
-
-#         print('Writing', table_name + ' to SQL db...')
-#         if table_name.startswith('covid'):
-#             df._to_pandas().to_sql(table_name, con_cov, if_exists='replace',
-#                                    index=False, chunksize=50_000,
-#                                    dtype=record_col_types[table_name])
-#         else:
-#             df._to_pandas().to_sql(table_name, con_rec, if_exists='replace',
-#                                    index=False, chunksize=50_000,
-#                                    dtype=record_col_types[table_name])
-
-#     con_rec.close()
-#     if includes_covid:
-#         con_cov.close()

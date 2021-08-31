@@ -325,8 +325,10 @@ def withdraw(ctx, project_dir, out_dir, parent_dir):
 @click.option('-p', '--project-dir', help='Name of project directory')
 @click.option('--parent-dir', default=None,
               help='Absolute path to project parent directory')
+@click.option('-f', '--fam', default=None, help='Name of the fam file.')
+@click.option('-s', '--sample', default=None, help='Name of the sample file.')
 @click.pass_context
-def remove(ctx, project_dir, parent_dir):
+def remove(ctx, project_dir, fam, sample, parent_dir):
     '''Removes withdrawals from latest sample information.
 
     Replaces withdrawal IDs in the fam and sample files with a negative
@@ -345,16 +347,39 @@ def remove(ctx, project_dir, parent_dir):
     fam_prefix = re.sub('_.*$', '', project_dir) + '_cal'
     sample_prefix = re.sub('_.*$', '', project_dir) + '_imp'
 
-    fam_file = max(glob.glob(
-        str(prj_dir / f'raw/{fam_prefix}*fam')), key=os.path.getctime)
+    # Prompt for fam file name if does not begin ukb<projectid>
+    fam_file_list = glob.glob(
+        str(prj_dir / f'raw/{fam_prefix}*fam'))
+
+    if not fam_file_list:
+        if fam is None:
+            print(
+                f'Use --fam to supply fam file name. (No fam file in raw/ starting ukb{fam_prefix})')
+            exit()
+        else:
+            fam_file = str(prj_dir / f'raw/{fam}')
+    else:
+        fam_file = max(fam_file_list, key=os.path.getctime)
+
     fam_names = ['fid', 'iid', 'pid', 'mid', 'sex', 'phe']
     fam_dtypes = dict(
         zip(fam_names, (['Int64'] * (len(fam_names) - 1)) + ['string']))
     fam = pd.read_table(fam_file, header=None, sep=' ', names=fam_names,
                         dtype=fam_dtypes)
 
-    sample_file = max(glob.glob(
-        str(prj_dir / f'raw/{sample_prefix}*sample')), key=os.path.getctime)
+    sample_file_list = glob.glob(
+        str(prj_dir / f'raw/{sample_prefix}*sample'))
+
+    if not sample_file_list:
+        if sample is None:
+            print(
+                f'Use --sample to supply sample file name. (No sample file in raw/ starting ukb{sample_prefix})')
+            exit()
+        else:
+            sample_file = str(prj_dir / f'raw/{sample}')
+    else:
+        sample_file = max(sample_file_list, key=os.path.getctime)
+
     sample_names = ['ID_1', 'ID_2', 'missing', 'sex']
     sample_dtypes = dict(zip(sample_names, (['Int64'] * len(sample_names))))
     sample = pd.read_table(sample_file, sep=' ', skiprows=[

@@ -446,7 +446,7 @@ def recdisk(ctx, project_dir, record):
     RECORD whitespace separated list of record-level data file names
     """
     pkg_dir = ctx.obj['pkg_dir']
-    prj_dir = pkg_dir.parent / project_dir
+    prj_dir = pkg_dir.parent.parent / project_dir
     rec_files_pos_arg = ' '.join(record)
 
     os.system(f'''

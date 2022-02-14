@@ -77,6 +77,8 @@ def clean(ctx, project_dir, users, parent_dir):
     Deletes defunct file/dir(s) from projects, and sets permissions.
 
     USERS A whitespace separated list of uids to grant rwx permission.
+    Supply all uids or none. If no uids are supplied, permissions will
+    not be changed.
     """
     if parent_dir is None:
         ukb_dir = ctx.obj['ukbiobank']
@@ -85,7 +87,7 @@ def clean(ctx, project_dir, users, parent_dir):
 
     prj_dir = ukb_dir / project_dir
 
-    for x in ['src', 'R', 'resources', 'returns',
+    for x in ['src', 'R', 'resources',
               'Snakefile', 'snake.py', 'project.py', 'link.py', 'fields.ukb']:
         os.system(f'rm -rf {prj_dir}/{x}')
 
@@ -97,7 +99,7 @@ def clean(ctx, project_dir, users, parent_dir):
                 f'setfacl -R -m u:{u}:rwX,d:u:{u}:rwX,g::r-X,d:g::r-X {prj_dir}')
 
     # add new subdirectories
-    for d in ['withdrawals', 'records']:
+    for d in ['withdrawals', 'records', 'returns']:
         (ukb_dir / project_dir / d).mkdir(exist_ok=True)
 
 

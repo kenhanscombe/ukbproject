@@ -19,8 +19,10 @@ from pathlib import Path
 
 @click.group()
 @click.version_option()
+@click.option('--hpc', default='ROSALIND',
+              help='Either "ROSALIND" (default) or "CREATE". Sets path to UKB data.')
 @click.pass_context
-def cli(ctx):
+def cli(ctx, hpc):
     """
     Sets up a UKB project on Rosalind storing common data and utilities in the
     parent directory, at resources/ and bin/ respectively.
@@ -29,11 +31,16 @@ def cli(ctx):
     pkg_dir = module_p.absolute().parent
     os.environ['PROJECT'] = str(pkg_dir)
 
-    p = Path('/scratch/datasets/ukbiobank')
+    if hpc == 'ROSALIND':
+        ukb = '/scratch/datasets/ukbiobank'
+    elif hpc == 'CREATE':
+        ukb = '/datasets/ukbiobank'
+    
+    p = Path(ukb)
     ctx.ensure_object(dict)
     ctx.obj['ukbiobank'] = p.absolute()
-    ctx.obj['genotyped'] = '/scratch/datasets/ukbiobank/June2017/Genotypes'
-    ctx.obj['imputed'] = '/scratch/datasets/ukbiobank/June2017/Imputed'
+    ctx.obj['genotyped'] = ukb + '/June2017/Genotypes'
+    ctx.obj['imputed'] = ukb + '/June2017/Imputed'
     ctx.obj['pkg_dir'] = pkg_dir
 
 

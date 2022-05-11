@@ -36,7 +36,8 @@ Clone the github repo
 
 ```{bash}
 git clone https://github.com/kenhanscombe/ukbproject.git
-chmod +x munge.py
+cd ukbproject
+chmod +x ukbproject/munge.py
 ```
 
 KCL Rosalind users load the default python3 module
@@ -49,7 +50,7 @@ module load <default_python3_module>
 Create and load the conda environment
 
 ```{bash}
-conda env create -f environment.yml
+conda env create -f ukbproject/conf/environment.yml
 conda activate ukbproject
 python3 -m pip install --editable .
 ```
@@ -134,6 +135,10 @@ ukb&ltproject_id&gt
 </pre>
 
 **Figure 1** Project directory structure
+
+<br>
+
+For most other operations, you should change into the project folder.
 
 <br>
 
@@ -270,12 +275,23 @@ vignette("Access UKB data on Rosalind")
 <a name="withdrawals"></a>
 ## 4. Additional withdrawals
 
-Each time an updated set of participant withdrawals is received,
-replace the w\<*project-id*\>_\<*yyyymmdd*\>.csv file in raw/ with
-the new file. To exclude the latest withdrawals you have to generate
-your dataset with ukbkings again. Be aware that if any researcher on
-your project does run the tool again (to grab some other data say),
-this would apply the latest set of withdrawals. 
+Each time an updated set of participant withdrawals is received, add the
+w\<*project-id*\>_\<*yyyymmdd*\>.csv file to raw/.
+
+To exclude the latest withdrawals from the phenotype data, you have to
+generate your dataset with `ukbkings::bio_phen` again. Be aware that if
+any researcher on your project does run `ukbkings::bio_phen` again, to
+grab some other data say, this would apply the latest set of
+withdrawals. 
+
+To exclude the latest withdrawals from the genotype link files (.fam,
+.sample), there is a 2-step process: generate a list of withdrawals with
+`prj withdraw`, and then remove them from the link files with
+`prj remove`.
+
+Note. In both cases the row count remains the same: `ukbkings::bio_phen`
+replaces phenotype data values with `NA`; `prj remove` replaces IDs with
+negative integer. This preserves the row count and alignment of files.
 
 <br>
 

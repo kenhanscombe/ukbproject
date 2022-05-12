@@ -24,7 +24,7 @@ from pathlib import Path
 @click.pass_context
 def cli(ctx, hpc):
     """
-    Sets up a UKB project on Rosalind storing common data and utilities in the
+    Sets up a UKB project on Rosalind/CREATE storing common data and utilities in the
     parent directory, at resources/ and bin/ respectively.
     """
     module_p = Path(__file__)

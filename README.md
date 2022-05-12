@@ -2,12 +2,11 @@
 
 ![build](https://github.com/kenhanscombe/ukbproject/workflows/build/badge.svg)
 
-A python CLI to setup a UK Biobank (UKB) project.
+A python CLI to setup a UK Biobank (UKB) project folder.
 
-**Important: At the moment, because default paths are specific to the
-KCL HPC cluster, this CLI is only useful for UKB-approved KCL
+**Important: This CLI is only useful for UKB-approved KCL
 reasearchers and their collaborators, with an account on the Rosalind
-HPC cluster. This python3 project is in alpha development.**
+or CREATE HPC clusters.**
 
 <br>
 
@@ -47,6 +46,24 @@ module avail python3
 module load <default_python3_module>
 ```
 
+KCL CREATE users load conda
+
+```{bash}
+module spider conda
+module load <default_conda_module>
+
+module spider python
+module load <python3_module>
+```
+
+You may be prompted to do a one-time `git init <SHELL_NAME>`. For bash
+
+```{bash}
+conda init bash
+```
+
+Reload the terminal or run `source ~/.bashrc`
+
 Create and load the conda environment
 
 ```{bash}
@@ -73,10 +90,11 @@ prj --help
 <pre>
 Usage: prj [OPTIONS] COMMAND [ARGS]...
 
-Sets up a UKB project on Rosalind storing common data and utilities in the parent directory, at resources/ and bin/ respectively.
+Sets up a UKB project on Rosalind/CREATE storing common data and utilities in the parent directory, at resources/ and bin/ respectively.
 
 Options:
   --version  Show the version and exit.
+  --hpc TEXT  Either "ROSALIND" (default) or "CREATE". Sets path to UKB data.
   --help     Show this message and exit.
 
 Commands:

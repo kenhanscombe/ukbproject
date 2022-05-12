@@ -35,22 +35,29 @@ Clone the github repo
 
 ```{bash}
 git clone https://github.com/kenhanscombe/ukbproject.git
+```
+
+Change into the ukbproject directory, make munge.py executable, and copy the snakemake SLURM profile (replace `<username>` with your KCL username).
+
+```{bash}
 cd ukbproject
 chmod +x ukbproject/munge.py
+mkdir -p /users/<username>/.config/snakemake
+cp -R ukbproject/conf/slurm /users/<username>/.config/snakemake
 ```
 
 KCL Rosalind users load the default python3 module
 
 ```{bash}
 module avail python3
-module load <default_python3_module>
+module load <python3_module>
 ```
 
-KCL CREATE users load conda
+KCL CREATE users load conda and python3
 
 ```{bash}
 module spider conda
-module load <default_conda_module>
+module load <conda_module>
 
 module spider python
 module load <python3_module>
@@ -62,9 +69,8 @@ You may be prompted to do a one-time `git init <SHELL_NAME>`. For bash
 conda init bash
 ```
 
-Reload the terminal or run `source ~/.bashrc`
-
-Create and load the conda environment
+Reload the terminal or run `source ~/.bashrc`. Create the conda
+environment activate it and install the ukbproject package into it.
 
 ```{bash}
 conda env create -f ukbproject/conf/environment.yml

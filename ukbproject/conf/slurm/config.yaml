@@ -1,0 +1,16 @@
+---
+restart-times: 0
+jobscript: "slurm-jobscript.sh"
+cluster: "slurm-submit.py"
+cluster-status: "slurm-status.py"
+max-jobs-per-second: 1
+max-status-checks-per-second: 10
+local-cores: 1
+latency-wait: 60
+
+jobs: 10
+use-conda: true
+use-envmodules: true
+keep-going: true
+rerun-incomplete: true
+printshellcmds: true

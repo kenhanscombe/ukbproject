@@ -1,0 +1,9 @@
+---
+__default__:
+  partition: brc
+  time: 30  # minutes
+  # nodes: 4
+  # ntasks: 4
+  # mem: 6GB
+  output: "logs/{rule}.{wildcards}.slurm-%j.out"
+  error: "logs/{rule}.{wildcards}.slurm-%j.err"
